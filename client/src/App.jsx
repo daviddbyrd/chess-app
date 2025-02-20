@@ -1,9 +1,9 @@
-import Board from "./components/Board.jsx";
+import MainPage from "./views/MainPage.jsx";
 
 function App() {
   return (
     <div className="flex items-center justify-center h-screen">
-      <Board />
+      <MainPage />
     </div>
   );
 }

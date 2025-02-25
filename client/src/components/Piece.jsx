@@ -6,7 +6,9 @@ const Piece = ({ row, col, piece, handleClick }) => {
       className="w-20 h-20 bg-cover bg-center"
       style={{ backgroundImage: `url('../../public/${piece}.png')` }}
       onClick={() => handleClick(row, col, piece)}
-    ></div>
+    >
+      {`r${row}`} {`c${col}`}
+    </div>
   );
 };
 

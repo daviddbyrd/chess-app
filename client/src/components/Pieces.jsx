@@ -178,6 +178,26 @@ const Pieces = () => {
     return true;
   };
 
+  const isValidQueen = (newRow, newCol) => {
+    return isValidRook(newRow, newCol) || isValidBishop(newRow, newCol);
+  };
+
+  const isValidKing = (newRow, newCol) => {
+    if (pieces[newRow][newCol]) {
+      if (pieces[newRow][newCol][0] === currentTurn) {
+        return false;
+      }
+    }
+    if (
+      Math.abs(newRow - currentPiece.row) <= 1 &&
+      Math.abs(newCol - currentPiece.col) <= 1
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   const isValidMove = (newRow, newCol) => {
     if (currentTurn != currentPiece.piece[0]) {
       return false;
@@ -197,6 +217,14 @@ const Pieces = () => {
 
     if (currentPiece.piece[1] === "r") {
       return isValidRook(newRow, newCol);
+    }
+
+    if (currentPiece.piece[1] === "q") {
+      return isValidQueen(newRow, newCol);
+    }
+
+    if (currentPiece.piece[1] === "k") {
+      return isValidKing(newRow, newCol);
     }
 
     return false;

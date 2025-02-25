@@ -110,8 +110,6 @@ const Pieces = () => {
       Math.abs(newRow - currentPiece.row) != Math.abs(newCol - currentPiece.col)
     ) {
       return false;
-    } else if (newRow === currentPiece.row) {
-      return false;
     }
 
     let rdif = 0;
@@ -133,9 +131,49 @@ const Pieces = () => {
       r += rdif;
       c += cdif;
       if (pieces[r][c]) {
-        console.log("fail");
         return false;
       }
+    }
+    return true;
+  };
+
+  const isValidRook = (newRow, newCol) => {
+    if (pieces[newRow][newCol]) {
+      if (pieces[newRow][newCol][0] === currentTurn) {
+        return false;
+      }
+    }
+
+    if (newRow === currentPiece.row) {
+      let dif = 0;
+      if (newCol > currentPiece.col) {
+        dif = 1;
+      } else {
+        dif = -1;
+      }
+      let c = currentPiece.col;
+      for (let i = 0; i < Math.abs(newCol - currentPiece.col) - 1; i++) {
+        c += dif;
+        if (pieces[newRow][c]) {
+          return false;
+        }
+      }
+    } else if (newCol === currentPiece.col) {
+      let dif = 0;
+      if (newRow > currentPiece.row) {
+        dif = 1;
+      } else {
+        dif = -1;
+      }
+      let r = currentPiece.row;
+      for (let i = 0; i < Math.abs(newRow - currentPiece.row) - 1; i++) {
+        r += dif;
+        if (pieces[r][newCol]) {
+          return false;
+        }
+      }
+    } else {
+      return false;
     }
     return true;
   };
@@ -155,6 +193,10 @@ const Pieces = () => {
 
     if (currentPiece.piece[1] === "b") {
       return isValidBishop(newRow, newCol);
+    }
+
+    if (currentPiece.piece[1] === "r") {
+      return isValidRook(newRow, newCol);
     }
 
     return false;

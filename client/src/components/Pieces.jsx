@@ -20,6 +20,7 @@ const Pieces = () => {
   });
 
   const isValidPawn = (newRow, newCol) => {
+    // REFACTOR 🙄
     if (currentTurn === "w") {
       if (pieces[newRow][newCol]) {
         if (pieces[newRow][newCol][0] === "w") {
@@ -203,7 +204,6 @@ const Pieces = () => {
   };
 
   const isCheck = (newPieces, turn) => {
-    console.log("good");
     const diag = [
       [1, 1],
       [1, -1],

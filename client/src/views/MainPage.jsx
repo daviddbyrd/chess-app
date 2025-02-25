@@ -4,7 +4,7 @@ import Pieces from "../components/Pieces";
 
 const MainPage = () => {
   return (
-    <div className="relative">
+    <div className="flex items-center justify-center h-screen">
       <Board />
       <Pieces />
     </div>

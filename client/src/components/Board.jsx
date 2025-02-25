@@ -5,10 +5,14 @@ const Board = () => {
   const cols = 8;
 
   return (
-    <div className="grid grid-cols-8 absolute top-0 left-0">
+    <div className="grid grid-cols-8 absolute">
       {Array.from({ length: rows }).map((_, rowIndex) =>
         Array.from({ length: cols }).map((_, colIndex) => (
-          <Square row={rowIndex} col={colIndex} />
+          <Square
+            key={`${rowIndex}-${colIndex}`}
+            row={rowIndex}
+            col={colIndex}
+          />
         ))
       )}
     </div>

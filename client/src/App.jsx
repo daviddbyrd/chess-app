@@ -2,7 +2,7 @@ import MainPage from "./views/MainPage.jsx";
 
 function App() {
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div>
       <MainPage />
     </div>
   );

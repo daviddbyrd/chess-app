@@ -18,6 +18,9 @@ const Pieces = () => {
   const isValidPawn = (newRow, newCol) => {
     if (currentTurn === "w") {
       if (pieces[newRow][newCol]) {
+        if (pieces[newRow][newCol][0] === "w") {
+          return false;
+        }
         if (
           newRow - 1 === currentPiece.row &&
           (newCol - 1 === currentPiece.col || newCol + 1 === currentPiece.col)
@@ -46,6 +49,9 @@ const Pieces = () => {
       }
     } else {
       if (pieces[newRow][newCol]) {
+        if (pieces[newRow][newCol] === "b") {
+          return false;
+        }
         if (
           newRow + 1 === currentPiece.row &&
           (newCol - 1 === currentPiece.col || newCol + 1 === currentPiece.col)
@@ -75,14 +81,83 @@ const Pieces = () => {
     }
   };
 
+  const isValidKnight = (newRow, newCol) => {
+    if (pieces[newRow][newCol]) {
+      if (pieces[newRow][newCol][0] === currentTurn) {
+        return false;
+      }
+    }
+    if (
+      (Math.abs(newRow - currentPiece.row) === 2 &&
+        Math.abs(newCol - currentPiece.col) === 1) ||
+      (Math.abs(newRow - currentPiece.row) === 1 &&
+        Math.abs(newCol - currentPiece.col) === 2)
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const isValidBishop = (newRow, newCol) => {
+    if (pieces[newRow][newCol]) {
+      if (pieces[newRow][newCol][0] === currentTurn) {
+        return false;
+      }
+    }
+
+    if (
+      Math.abs(newRow - currentPiece.row) != Math.abs(newCol - currentPiece.col)
+    ) {
+      return false;
+    } else if (newRow === currentPiece.row) {
+      return false;
+    }
+
+    let rdif = 0;
+    let cdif = 0;
+    if (newRow > currentPiece.row) {
+      rdif = 1;
+    } else {
+      rdif = -1;
+    }
+    if (newCol > currentPiece.col) {
+      cdif = 1;
+    } else {
+      cdif = -1;
+    }
+    let r = currentPiece.row;
+    let c = currentPiece.col;
+
+    for (let i = 0; i < Math.abs(newRow - currentPiece.row) - 1; i++) {
+      r += rdif;
+      c += cdif;
+      if (pieces[r][c]) {
+        console.log("fail");
+        return false;
+      }
+    }
+    return true;
+  };
+
   const isValidMove = (newRow, newCol) => {
     if (currentTurn != currentPiece.piece[0]) {
       return false;
     }
 
-    if (currentPiece.piece[1] == "p") {
+    if (currentPiece.piece[1] === "p") {
       return isValidPawn(newRow, newCol);
     }
+
+    if (currentPiece.piece[1] === "n") {
+      return isValidKnight(newRow, newCol);
+    }
+
+    if (currentPiece.piece[1] === "b") {
+      return isValidBishop(newRow, newCol);
+    }
+
+    return false;
   };
 
   const movePiece = (newRow, newCol) => {
@@ -107,7 +182,9 @@ const Pieces = () => {
     if (currentPiece) {
       movePiece(row, col);
     } else {
-      setCurrentPiece({ row, col, piece });
+      if (piece) {
+        setCurrentPiece({ row, col, piece });
+      }
     }
   };
 

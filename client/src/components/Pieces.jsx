@@ -14,6 +14,10 @@ const Pieces = () => {
   ]);
   const [currentPiece, setCurrentPiece] = useState(null);
   const [currentTurn, setCurrentTurn] = useState("w");
+  const [kingPos, setKingPos] = useState({
+    w: { row: 0, col: 4 },
+    b: { row: 7, col: 4 },
+  });
 
   const isValidPawn = (newRow, newCol) => {
     if (currentTurn === "w") {
@@ -198,36 +202,164 @@ const Pieces = () => {
     }
   };
 
+  const isCheck = (newPieces, turn) => {
+    console.log("good");
+    const diag = [
+      [1, 1],
+      [1, -1],
+      [-1, 1],
+      [-1, -1],
+    ];
+    let kingRow = kingPos[turn].row;
+    let kingCol = kingPos[turn].col;
+
+    for (let i = 0; i < 4; i++) {
+      let rdif = diag[i][0];
+      let cdif = diag[i][1];
+      let r = kingRow + rdif;
+      let c = kingCol + cdif;
+      while (0 <= r && r < 8 && 0 <= c && c < 8) {
+        if (newPieces[r][c]) {
+          if (newPieces[r][c][0] === turn) {
+            break;
+          } else if (newPieces[r][c][1] === "q" || newPieces[r][c][1] === "b") {
+            return true;
+          }
+        }
+        r += rdif;
+        c += cdif;
+      }
+    }
+
+    const ortho = [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ];
+    for (let i = 0; i < 4; i++) {
+      let rdif = ortho[i][0];
+      let cdif = ortho[i][1];
+      let r = kingRow + rdif;
+      let c = kingCol + cdif;
+      while (0 <= r && r < 8 && 0 <= c && c < 8) {
+        if (newPieces[r][c]) {
+          if (newPieces[r][c][0] === turn) {
+            break;
+          } else if (newPieces[r][c][1] === "q" || newPieces[r][c][1] === "r") {
+            return true;
+          }
+        }
+        r += rdif;
+        c += cdif;
+      }
+    }
+
+    if (turn === "w") {
+      if (
+        kingRow < 7 &&
+        ((kingCol > 0 && newPieces[kingRow + 1][kingCol - 1] === "bp") ||
+          (kingCol < 7 && newPieces[kingRow + 1][kingCol + 1] === "bp"))
+      ) {
+        return true;
+      }
+    } else {
+      if (
+        kingRow > 0 &&
+        ((kingCol > 0 && newPieces[kingRow - 1][kingCol - 1] === "wp") ||
+          (kingCol < 7 && newPieces[kingRow - 1][kingCol + 1] === "wp"))
+      ) {
+        return true;
+      }
+    }
+
+    const difs = [-1, 1];
+    for (let i = 0; i < 2; i++) {
+      for (let j = 0; j < 2; j++) {
+        let r = kingRow + difs[i] * 2;
+        let c = kingCol + difs[j] * 1;
+        if (0 <= r && r < 8 && 0 <= c && c < 8) {
+          if (
+            newPieces[r][c] &&
+            newPieces[r][c][0] != turn &&
+            newPieces[r][c][1] === "n"
+          ) {
+            return true;
+          }
+        }
+        r = kingRow + difs[i] * 1;
+        c = kingCol + difs[j] * 2;
+        if (0 <= r && r < 8 && 0 <= c && c < 8) {
+          if (
+            newPieces[r][c] &&
+            newPieces[r][c][0] != turn &&
+            newPieces[r][c][1] === "n"
+          ) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+
   const isValidMove = (newRow, newCol) => {
     if (currentTurn != currentPiece.piece[0]) {
       return false;
     }
 
     if (currentPiece.piece[1] === "p") {
-      return isValidPawn(newRow, newCol);
+      if (!isValidPawn(newRow, newCol)) {
+        return false;
+      }
     }
 
     if (currentPiece.piece[1] === "n") {
-      return isValidKnight(newRow, newCol);
+      if (!isValidKnight(newRow, newCol)) {
+        return false;
+      }
     }
 
     if (currentPiece.piece[1] === "b") {
-      return isValidBishop(newRow, newCol);
+      if (!isValidBishop(newRow, newCol)) {
+        return false;
+      }
     }
 
     if (currentPiece.piece[1] === "r") {
-      return isValidRook(newRow, newCol);
+      if (!isValidRook(newRow, newCol)) {
+        return false;
+      }
     }
 
     if (currentPiece.piece[1] === "q") {
-      return isValidQueen(newRow, newCol);
+      if (!isValidQueen(newRow, newCol)) {
+        return false;
+      }
     }
 
     if (currentPiece.piece[1] === "k") {
-      return isValidKing(newRow, newCol);
+      if (!isValidKing(newRow, newCol)) {
+        return false;
+      }
     }
 
-    return false;
+    const nextPieces = pieces.map((row, rowIndex) =>
+      row.map((piece, colIndex) => {
+        if (rowIndex === currentPiece.row && colIndex === currentPiece.col) {
+          return null;
+        } else if (rowIndex === newRow && colIndex === newCol) {
+          return currentPiece.piece;
+        } else {
+          return piece;
+        }
+      })
+    );
+
+    if (isCheck(nextPieces, currentTurn)) {
+      return false;
+    }
+    return true;
   };
 
   const movePiece = (newRow, newCol) => {
@@ -244,6 +376,14 @@ const Pieces = () => {
         })
       );
       setPieces(nextPieces);
+      if (currentPiece.piece[1] === "k") {
+        setKingPos({ ...kingPos, currentTurn: { row: newRow, col: newCol } });
+      }
+      if (currentTurn === "b") {
+        setCurrentTurn("w");
+      } else {
+        setCurrentTurn("b");
+      }
     }
     setCurrentPiece(null);
   };

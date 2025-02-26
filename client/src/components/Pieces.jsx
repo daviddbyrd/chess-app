@@ -19,7 +19,7 @@ const Pieces = () => {
     b: { row: 7, col: 4 },
   });
 
-  const isValidPawn = (newRow, newCol) => {
+  const isValidPawnMove = (newRow, newCol) => {
     // REFACTOR 🙄
     if (currentTurn === "w") {
       if (pieces[newRow][newCol]) {
@@ -86,7 +86,7 @@ const Pieces = () => {
     }
   };
 
-  const isValidKnight = (newRow, newCol) => {
+  const isValidKnightMove = (newRow, newCol) => {
     if (pieces[newRow][newCol]) {
       if (pieces[newRow][newCol][0] === currentTurn) {
         return false;
@@ -104,7 +104,7 @@ const Pieces = () => {
     }
   };
 
-  const isValidBishop = (newRow, newCol) => {
+  const isValidBishopMove = (newRow, newCol) => {
     if (pieces[newRow][newCol]) {
       if (pieces[newRow][newCol][0] === currentTurn) {
         return false;
@@ -142,7 +142,7 @@ const Pieces = () => {
     return true;
   };
 
-  const isValidRook = (newRow, newCol) => {
+  const isValidRookMove = (newRow, newCol) => {
     if (pieces[newRow][newCol]) {
       if (pieces[newRow][newCol][0] === currentTurn) {
         return false;
@@ -183,11 +183,11 @@ const Pieces = () => {
     return true;
   };
 
-  const isValidQueen = (newRow, newCol) => {
+  const isValidQueenMove = (newRow, newCol) => {
     return isValidRook(newRow, newCol) || isValidBishop(newRow, newCol);
   };
 
-  const isValidKing = (newRow, newCol) => {
+  const isValidKingMove = (newRow, newCol) => {
     if (pieces[newRow][newCol]) {
       if (pieces[newRow][newCol][0] === currentTurn) {
         return false;
@@ -309,37 +309,37 @@ const Pieces = () => {
     }
 
     if (currentPiece.piece[1] === "p") {
-      if (!isValidPawn(newRow, newCol)) {
+      if (!isValidPawnMove(newRow, newCol)) {
         return false;
       }
     }
 
     if (currentPiece.piece[1] === "n") {
-      if (!isValidKnight(newRow, newCol)) {
+      if (!isValidKnightMove(newRow, newCol)) {
         return false;
       }
     }
 
     if (currentPiece.piece[1] === "b") {
-      if (!isValidBishop(newRow, newCol)) {
+      if (!isValidBishopMove(newRow, newCol)) {
         return false;
       }
     }
 
     if (currentPiece.piece[1] === "r") {
-      if (!isValidRook(newRow, newCol)) {
+      if (!isValidRookMove(newRow, newCol)) {
         return false;
       }
     }
 
     if (currentPiece.piece[1] === "q") {
-      if (!isValidQueen(newRow, newCol)) {
+      if (!isValidQueenMove(newRow, newCol)) {
         return false;
       }
     }
 
     if (currentPiece.piece[1] === "k") {
-      if (!isValidKing(newRow, newCol)) {
+      if (!isValidKingMove(newRow, newCol)) {
         return false;
       }
     }

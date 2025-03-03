@@ -16,7 +16,6 @@ const Pieces = () => {
   const [currentTurn, setCurrentTurn] = useState("w");
 
   const isValidPawnMove = (newRow, newCol) => {
-    // REFACTOR 🙄
     if (currentTurn === "w") {
       if (pieces[newRow][newCol]) {
         if (pieces[newRow][newCol][0] === "w") {
@@ -378,6 +377,75 @@ const Pieces = () => {
     return true;
   };
 
+  const createPieces = (oldPieces, oldRow, oldCol, newRow, newCol) => {
+    const newPieces = oldPieces.map((row, rowIndex) =>
+      row.map((piece, colIndex) => {
+        if (rowIndex === oldRow && colIndex === oldCol) {
+          return null;
+        } else if (rowIndex === newRow && colIndex === newCol) {
+          return currentPiece.piece;
+        } else {
+          return piece;
+        }
+      })
+    );
+    return newPieces;
+  };
+
+  const tryKnightMoves = (newPieces, turn, row, col) => {
+    const difs = [-1, 1];
+    for (let i = 0; i < 2; i++) {
+      for (let j = 0; j < 2; j++) {
+        let r = row + difs[i] * 2;
+        let c = col + difs[j] * 1;
+
+        const piecesAfterMove = createPieces(newPieces, row, col, r, c);
+        if (!isCheck(piecesAfterMove)) {
+          return true;
+        }
+        r = row + difs[i] * 1;
+        c = col + difs[j] * 2;
+        piecesAfterMove = createPieces(newPieces, roll, col, r, c);
+        if (!isCheck(piecesAfterMove)) {
+          return true;
+        }
+      }
+    }
+  };
+
+  const tryBishopMoves = (newPieces, turn, )
+
+  const isCheckMate = (newPieces, turn) => {
+    for (let row = 0; row < 8; ++row) {
+      for (let col = 0; col < 8; ++col) {
+        if (newPieces[row][col] && newPieces[row][col][0] === "turn") {
+          if (newPieces[row][col][1] === "b") {
+          } else if (newPieces[row][col][1] === "n") {
+            if (tryKnightMoves(newPieces, turn, row, col)) {
+              return false;
+            }
+          } else if (newPieces[row][col][1] === "b") {
+            if (tryBishopMoves(newPieces, turn, row, col)) {
+              return false;
+            }
+          } else if (newPieces[row][col][1] === "r") {
+            if (tryRookMoves(newPieces, turn, row, col)) {
+              return false;
+            }
+          } else if (newPieces[row][col][1] === "q") {
+            if (tryQueenMoves(newPieces, turn, row, col)) {
+              return false;
+            }
+          } else if (newPieces[row][col][1] === "k") {
+            if (tryKingMoves(newPieces, turn, row, col)) {
+              return false;
+            }
+          }
+        }
+      }
+    }
+  };
+
   const movePiece = (newRow, newCol) => {
     if (isValidMove(newRow, newCol)) {
       const nextPieces = pieces.map((row, rowIndex) =>
@@ -395,8 +463,18 @@ const Pieces = () => {
       setPieces(nextPieces);
 
       if (currentTurn === "b") {
+        if (isCheck(nextPieces, "w")) {
+          if (isCheckMate(nextPieces, "w")) {
+            console.log("checkmate");
+          }
+        }
         setCurrentTurn("w");
       } else {
+        if (isCheck(nextPieces, "b")) {
+          if (isCheckMate(nextPieces, "b")) {
+            console.log("checkmate");
+          }
+        }
         setCurrentTurn("b");
       }
     }

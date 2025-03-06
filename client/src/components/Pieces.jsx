@@ -1,5 +1,8 @@
 import { useState } from "react";
 import Piece from "./Piece.jsx";
+import { Bishop } from "./pieces/Bishop.js";
+import { Pawn } from "./pieces/Pawn.js";
+import { Knight } from "./pieces/Knight.js";
 
 const Pieces = () => {
   const [pieces, setPieces] = useState([
@@ -20,7 +23,6 @@ const Pieces = () => {
   });
 
   const isValidPawn = (newRow, newCol) => {
-    // REFACTOR 🙄
     if (currentTurn === "w") {
       if (pieces[newRow][newCol]) {
         if (pieces[newRow][newCol][0] === "w") {
@@ -309,19 +311,46 @@ const Pieces = () => {
     }
 
     if (currentPiece.piece[1] === "p") {
-      if (!isValidPawn(newRow, newCol)) {
+      if (
+        !Pawn.isValidMove(
+          pieces,
+          currentPiece.row,
+          currentPiece.col,
+          newRow,
+          newCol,
+          currentTurn
+        )
+      ) {
         return false;
       }
     }
 
     if (currentPiece.piece[1] === "n") {
-      if (!isValidKnight(newRow, newCol)) {
+      if (
+        !Knight.isValidMove(
+          pieces,
+          currentPiece.row,
+          currentPiece.col,
+          newRow,
+          newCol,
+          currentTurn
+        )
+      ) {
         return false;
       }
     }
 
     if (currentPiece.piece[1] === "b") {
-      if (!isValidBishop(newRow, newCol)) {
+      if (
+        !Bishop.isValidMove(
+          pieces,
+          currentPiece.row,
+          currentPiece.col,
+          newRow,
+          newCol,
+          currentTurn
+        )
+      ) {
         return false;
       }
     }

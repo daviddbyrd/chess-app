@@ -3,6 +3,7 @@ import Piece from "./Piece.jsx";
 import { Bishop } from "./pieces/Bishop.js";
 import { Pawn } from "./pieces/Pawn.js";
 import { Knight } from "./pieces/Knight.js";
+import { King } from "./pieces/King.js";
 
 const Pieces = () => {
   const [pieces, setPieces] = useState([
@@ -368,7 +369,16 @@ const Pieces = () => {
     }
 
     if (currentPiece.piece[1] === "k") {
-      if (!isValidKing(newRow, newCol)) {
+      if (
+        !King.isValidMove(
+          pieces,
+          currentPiece.row,
+          currentPiece.col,
+          newRow,
+          newCol,
+          currentTurn
+        )
+      ) {
         return false;
       }
     }

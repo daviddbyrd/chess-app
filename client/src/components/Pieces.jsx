@@ -24,6 +24,7 @@ const Pieces = () => {
           if (rowIndex === oldRow && colIndex === oldCol) {
             return null;
           } else if (rowIndex === newRow && colIndex === newCol) {
+            console.log(`${rowIndex}${colIndex}`);
             return newPiece;
           } else {
             return piece;
@@ -42,6 +43,7 @@ const Pieces = () => {
   };
 
   const handleClick = (row, col, piece) => {
+    console.log("called");
     if (currentPiece) {
       movePiece(currentPiece.row, currentPiece.col, row, col);
     } else {
@@ -64,10 +66,11 @@ const Pieces = () => {
 
     let data = e.dataTransfer.getData("text/plain");
     console.log(data);
-    let row = data[2];
-    let col = data[3];
-
-    movePiece(row, col, newRow, newCol);
+    let row = parseInt(data[2]);
+    let col = parseInt(data[3]);
+    if (0 <= newRow && newRow < 8 && 0 <= newCol && newCol < 8) {
+      movePiece(row, col, newRow, newCol);
+    }
   };
 
   const handleDragOver = (e) => e.preventDefault();

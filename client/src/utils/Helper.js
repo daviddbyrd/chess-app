@@ -5,14 +5,32 @@ import { Knight } from "./Knight";
 import { Queen } from "./Queen";
 import { King } from "./King";
 
-export const isCheck = (pieces, turn) => {
-  const diag = [
-    [1, 1],
-    [1, -1],
-    [-1, 1],
-    [-1, -1],
-  ];
+const pieceConvert = {
+  p: Pawn,
+  b: Bishop,
+  r: Rook,
+  n: Knight,
+  q: Queen,
+  k: King,
+};
 
+export const constructBoard = (pieces, oldRow, oldCol, newRow, newCol) => {
+  const newPiece = pieces[oldRow][oldCol];
+  const nextPieces = pieces.map((row, rowIndex) =>
+    row.map((piece, colIndex) => {
+      if (rowIndex === oldRow && colIndex === oldCol) {
+        return null;
+      } else if (rowIndex === newRow && colIndex === newCol) {
+        return newPiece;
+      } else {
+        return piece;
+      }
+    })
+  );
+  return nextPieces;
+};
+
+export const isCheck = (pieces, turn) => {
   let kingRow = 0;
   let kingCol = 0;
 
@@ -25,6 +43,13 @@ export const isCheck = (pieces, turn) => {
       }
     }
   }
+
+  const diag = [
+    [1, 1],
+    [1, -1],
+    [-1, 1],
+    [-1, -1],
+  ];
 
   for (let i = 0; i < 4; i++) {
     let rdif = diag[i][0];
@@ -124,40 +149,10 @@ export const isValidMove = (...args) => {
     return false;
   }
 
-  if (currentPiece[1] === "p") {
-    if (!Pawn.isValidMove(...args)) {
-      return false;
-    }
-  }
+  const PieceClass = pieceConvert[currentPiece[1]];
 
-  if (currentPiece[1] === "n") {
-    if (!Knight.isValidMove(...args)) {
-      return false;
-    }
-  }
-
-  if (currentPiece[1] === "b") {
-    if (!Bishop.isValidMove(...args)) {
-      return false;
-    }
-  }
-
-  if (currentPiece[1] === "r") {
-    if (!Rook.isValidMove(...args)) {
-      return false;
-    }
-  }
-
-  if (currentPiece[1] === "q") {
-    if (!Queen.isValidMove(...args)) {
-      return false;
-    }
-  }
-
-  if (currentPiece[1] === "k") {
-    if (!King.isValidMove(...args)) {
-      return false;
-    }
+  if (!PieceClass.isValidMove(...args)) {
+    return false;
   }
 
   const nextPieces = pieces.map((row, rowIndex) =>
@@ -174,6 +169,24 @@ export const isValidMove = (...args) => {
 
   if (isCheck(nextPieces, turn)) {
     return false;
+  }
+  return true;
+};
+
+export const isCheckmate = (pieces, turn) => {
+  if (!isCheck(pieces, turn)) {
+    return false;
+  }
+
+  for (let row = 0; row < 8; ++row) {
+    for (let col = 0; col < 8; ++col) {
+      if (pieces[row][col] && pieces[row][col][0] === turn) {
+        const PieceClass = pieceConvert[currentPiece[1]];
+        if (PieceClass.canStopCheck(pieces, row, col, turn)) {
+          return false;
+        }
+      }
+    }
   }
   return true;
 };

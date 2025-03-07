@@ -15,7 +15,7 @@ const Piece = ({ row, col, piece, handleClick }) => {
 
   return (
     <div
-      className="w-20 h-20 bg-cover bg-center"
+      className="w-20 h-20 bg-cover bg-center cursor-grab active:cursor-grabbing"
       style={{ backgroundImage: `url('../../public/${piece}.png')` }}
       onClick={() => handleClick(row, col, piece)}
       draggable="true"

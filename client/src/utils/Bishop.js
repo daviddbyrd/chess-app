@@ -1,3 +1,5 @@
+import { isValidMove, isCheck, constructBoard } from "./Helper.js";
+
 export const Bishop = {
   isValidMove: (pieces, oldRow, oldCol, newRow, newCol, turn) => {
     if (pieces[newRow][newCol]) {
@@ -33,5 +35,38 @@ export const Bishop = {
       }
     }
     return true;
+  },
+
+  canStopCheck: (pieces, oldRow, oldCol, turn) => {
+    const diag = [
+      [1, 1],
+      [1, -1],
+      [-1, 1],
+      [-1, -1],
+    ];
+
+    for (let i = 0; i < 4; i++) {
+      let rdif = diag[i][0];
+      let cdif = diag[i][1];
+      let newRow = oldRow + rdif;
+      let newCol = oldCol + cdif;
+      while (0 <= newRow && newRow < 8 && 0 <= newCol && newCol < 8) {
+        if (isValidMove(pieces, oldRow, oldCol, newRow, newCol, turn)) {
+          const newPieces = constructBoard(
+            pieces,
+            oldRow,
+            oldCol,
+            newRow,
+            newCol
+          );
+          if (!isCheck(newPieces, turn)) {
+            return true;
+          }
+        }
+        newRow += rdif;
+        newCol += cdif;
+      }
+    }
+    return false;
   },
 };

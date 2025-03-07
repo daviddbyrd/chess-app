@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Piece from "./Piece.jsx";
-import { isValidMove } from "../utils/Helper.js";
+import { isValidMove, isCheckmate, constructBoard } from "../utils/Helper.js";
 
 const Pieces = () => {
   const [pieces, setPieces] = useState([
@@ -18,18 +18,7 @@ const Pieces = () => {
 
   const movePiece = (oldRow, oldCol, newRow, newCol) => {
     if (isValidMove(pieces, oldRow, oldCol, newRow, newCol, currentTurn)) {
-      const newPiece = pieces[oldRow][oldCol];
-      const nextPieces = pieces.map((row, rowIndex) =>
-        row.map((piece, colIndex) => {
-          if (rowIndex === oldRow && colIndex === oldCol) {
-            return null;
-          } else if (rowIndex === newRow && colIndex === newCol) {
-            return newPiece;
-          } else {
-            return piece;
-          }
-        })
-      );
+      const nextPieces = constructBoard(pieces, oldRow, oldCol, newRow, newCol);
       setPieces(nextPieces);
 
       if (currentTurn === "b") {
@@ -40,6 +29,12 @@ const Pieces = () => {
     }
     setCurrentPiece(null);
   };
+
+  useEffect(() => {
+    if (isCheckmate(pieces, currentTurn)) {
+      console.log("checkmate");
+    }
+  }, [currentTurn]);
 
   const handleClick = (row, col, piece) => {
     if (currentPiece) {

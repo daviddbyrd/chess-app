@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import Piece from "./Piece.jsx";
-import { isValidMove, isCheckmate, constructBoard } from "../utils/Helper.js";
+import {
+  isValidMove,
+  isCheck,
+  isCheckmate,
+  constructBoard,
+} from "../utils/Helper.js";
 
 const Pieces = () => {
   const [pieces, setPieces] = useState([
@@ -22,18 +27,8 @@ const Pieces = () => {
       setPieces(nextPieces);
 
       if (currentTurn === "b") {
-        if (isCheck(nextPieces, "w")) {
-          if (isCheckMate(nextPieces, "w")) {
-            console.log("checkmate");
-          }
-        }
         setCurrentTurn("w");
       } else {
-        if (isCheck(nextPieces, "b")) {
-          if (isCheckMate(nextPieces, "b")) {
-            console.log("checkmate");
-          }
-        }
         setCurrentTurn("b");
       }
     }

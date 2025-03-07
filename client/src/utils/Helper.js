@@ -177,11 +177,10 @@ export const isCheckmate = (pieces, turn) => {
   if (!isCheck(pieces, turn)) {
     return false;
   }
-
   for (let row = 0; row < 8; ++row) {
     for (let col = 0; col < 8; ++col) {
       if (pieces[row][col] && pieces[row][col][0] === turn) {
-        const PieceClass = pieceConvert[currentPiece[1]];
+        const PieceClass = pieceConvert[pieces[row][col][1]];
         if (PieceClass.canStopCheck(pieces, row, col, turn)) {
           return false;
         }

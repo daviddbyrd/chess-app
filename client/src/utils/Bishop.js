@@ -51,7 +51,7 @@ export const Bishop = {
       let newRow = oldRow + rdif;
       let newCol = oldCol + cdif;
       while (0 <= newRow && newRow < 8 && 0 <= newCol && newCol < 8) {
-        if (isValidMove(pieces, oldRow, oldCol, newRow, newCol, turn)) {
+        if (Bishop.isValidMove(pieces, oldRow, oldCol, newRow, newCol, turn)) {
           const newPieces = constructBoard(
             pieces,
             oldRow,

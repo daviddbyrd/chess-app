@@ -1,4 +1,4 @@
-import { isValidMove, isCheck, constructBoard } from "./Helper.js";
+import { isCheck, constructBoard } from "./Helper.js";
 
 export const Bishop = {
   isValidMove: (pieces, oldRow, oldCol, newRow, newCol, turn) => {

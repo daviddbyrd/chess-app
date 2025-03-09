@@ -38,6 +38,7 @@ const Pieces = () => {
   useEffect(() => {
     if (isCheckmate(pieces, currentTurn)) {
       console.log("checkmate");
+      setCheckmate(true);
     }
   }, [currentTurn]);
 
@@ -70,8 +71,14 @@ const Pieces = () => {
     }
   };
 
+  const handleDragOver = (e) => e.preventDefault();
+
   return (
-    <div className="grid grid-cols-8 absolute" onDrop={handleDrop}>
+    <div
+      className="grid grid-cols-8 absolute"
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+    >
       {pieces.toReversed().map((row, reversedIndex) => {
         const rowIndex = 7 - reversedIndex;
         return row.map((piece, colIndex) => (

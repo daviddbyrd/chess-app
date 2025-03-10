@@ -7,11 +7,6 @@ export const King = {
         return false;
       }
     }
-    if (turn == "w") {
-      if (oldRow === 0 && newRow === 0) {
-      }
-    } else {
-    }
 
     if (Math.abs(newRow - oldRow) <= 1 && Math.abs(newCol - oldCol) <= 1) {
       return true;

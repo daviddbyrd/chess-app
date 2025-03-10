@@ -34,31 +34,27 @@ export const constructBoard = (pieces, oldRow, oldCol, newRow, newCol) => {
 };
 
 export const isCheck = (pieces, turn) => {
-  let kingRow = 0;
-  let kingCol = 0;
-
   for (let row = 0; row < 8; ++row) {
     for (let col = 0; col < 8; ++col) {
       if (pieces[row][col] && pieces[row][col] === `${turn}k`) {
-        kingRow = row;
-        kingCol = col;
-        break;
+        return isTargeted(pieces, turn, row, col);
       }
     }
   }
+};
 
+export const isTargeted = (pieces, turn, targRow, targCol) => {
   const diag = [
     [1, 1],
     [1, -1],
     [-1, 1],
     [-1, -1],
   ];
-
   for (let i = 0; i < 4; i++) {
     let rdif = diag[i][0];
     let cdif = diag[i][1];
-    let r = kingRow + rdif;
-    let c = kingCol + cdif;
+    let r = targRow + rdif;
+    let c = targCol + cdif;
     while (0 <= r && r < 8 && 0 <= c && c < 8) {
       if (pieces[r][c]) {
         if (pieces[r][c][0] === turn) {
@@ -81,8 +77,8 @@ export const isCheck = (pieces, turn) => {
   for (let i = 0; i < 4; i++) {
     let rdif = ortho[i][0];
     let cdif = ortho[i][1];
-    let r = kingRow + rdif;
-    let c = kingCol + cdif;
+    let r = targRow + rdif;
+    let c = targCol + cdif;
     while (0 <= r && r < 8 && 0 <= c && c < 8) {
       if (pieces[r][c]) {
         if (pieces[r][c][0] === turn) {
@@ -98,17 +94,17 @@ export const isCheck = (pieces, turn) => {
 
   if (turn === "w") {
     if (
-      kingRow < 7 &&
-      ((kingCol > 0 && pieces[kingRow + 1][kingCol - 1] === "bp") ||
-        (kingCol < 7 && pieces[kingRow + 1][kingCol + 1] === "bp"))
+      targRow < 7 &&
+      ((targCol > 0 && pieces[targRow + 1][targCol - 1] === "bp") ||
+        (targCol < 7 && pieces[targRow + 1][targCol + 1] === "bp"))
     ) {
       return true;
     }
   } else {
     if (
-      kingRow > 0 &&
-      ((kingCol > 0 && pieces[kingRow - 1][kingCol - 1] === "wp") ||
-        (kingCol < 7 && pieces[kingRow - 1][kingCol + 1] === "wp"))
+      targRow > 0 &&
+      ((targCol > 0 && pieces[targRow - 1][targCol - 1] === "wp") ||
+        (targCol < 7 && pieces[targRow - 1][targCol + 1] === "wp"))
     ) {
       return true;
     }
@@ -117,8 +113,8 @@ export const isCheck = (pieces, turn) => {
   const difs = [-1, 1];
   for (let i = 0; i < 2; i++) {
     for (let j = 0; j < 2; j++) {
-      let r = kingRow + difs[i] * 2;
-      let c = kingCol + difs[j] * 1;
+      let r = targRow + difs[i] * 2;
+      let c = targCol + difs[j] * 1;
       if (0 <= r && r < 8 && 0 <= c && c < 8) {
         if (
           pieces[r][c] &&
@@ -128,8 +124,8 @@ export const isCheck = (pieces, turn) => {
           return true;
         }
       }
-      r = kingRow + difs[i] * 1;
-      c = kingCol + difs[j] * 2;
+      r = targRow + difs[i] * 1;
+      c = targCol + difs[j] * 2;
       if (0 <= r && r < 8 && 0 <= c && c < 8) {
         if (
           pieces[r][c] &&
@@ -206,7 +202,6 @@ export const isValidCastle = (
   turn,
   moved
 ) => {
-  console.log(moved);
   if (pieces[oldRow][oldCol][1] !== "k") {
     return false;
   }
@@ -222,8 +217,7 @@ export const isValidCastle = (
       return false;
     }
     for (let i = 5; i < 7; i++) {
-      if (pieces[oldRow][i]) {
-        console.log(i);
+      if (pieces[oldRow][i] || isTargeted(pieces, turn, oldRow, i)) {
         return false;
       }
     }
@@ -234,7 +228,7 @@ export const isValidCastle = (
       return false;
     }
     for (let i = 3; i > 0; i--) {
-      if (pieces[oldRow][i]) {
+      if (pieces[oldRow][i] || isTargeted(pieces, turn, oldRow, i)) {
         return false;
       }
     }

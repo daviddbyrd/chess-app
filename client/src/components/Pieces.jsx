@@ -21,10 +21,20 @@ const Pieces = () => {
   const [currentPiece, setCurrentPiece] = useState(null);
   const [currentTurn, setCurrentTurn] = useState("w");
   const [moved, setMoved] = useState(new Set());
+  const [prevMove, setPrevMove] = useState(null);
 
   const movePiece = (oldRow, oldCol, newRow, newCol) => {
     if (
-      isValidMove(pieces, oldRow, oldCol, newRow, newCol, currentTurn, moved)
+      isValidMove(
+        pieces,
+        oldRow,
+        oldCol,
+        newRow,
+        newCol,
+        currentTurn,
+        moved,
+        prevMove
+      )
     ) {
       if ("kr".includes(pieces[oldRow][oldCol][1])) {
         let code = `${oldRow}${pieces[oldRow][oldCol]}`;
@@ -34,6 +44,7 @@ const Pieces = () => {
       }
       const nextPieces = constructBoard(pieces, oldRow, oldCol, newRow, newCol);
       setPieces(nextPieces);
+      setPrevMove(`${oldRow}${oldCol}${newRow}${newCol}`);
 
       if (currentTurn === "b") {
         setCurrentTurn("w");

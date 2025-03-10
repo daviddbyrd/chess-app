@@ -17,6 +17,12 @@ const pieceConvert = {
 export const constructBoard = (pieces, oldRow, oldCol, newRow, newCol) => {
   if (pieces[oldRow][oldCol][1] === "k" && Math.abs(oldCol - newCol) > 1) {
     return constructCastleBoard(pieces, oldRow, oldCol, newRow, newCol);
+  } else if (
+    pieces[oldRow][oldCol][1] === "p" &&
+    !pieces[newRow][newCol] &&
+    oldCol !== newCol
+  ) {
+    return constructEnPassantBoard(pieces, oldRow, oldCol, newRow, newCol);
   }
   const newPiece = pieces[oldRow][oldCol];
   const nextPieces = pieces.map((row, rowIndex) =>
@@ -141,7 +147,7 @@ export const isTargeted = (pieces, turn, targRow, targCol) => {
 };
 
 export const isValidMove = (...args) => {
-  const [pieces, oldRow, oldCol, newRow, newCol, turn, moved] = args;
+  const [pieces, oldRow, oldCol, newRow, newCol, turn, moved, prevMove] = args;
   const currentPiece = pieces[oldRow][oldCol];
 
   if (isValidCastle(...args)) {
@@ -152,10 +158,18 @@ export const isValidMove = (...args) => {
     return false;
   }
 
-  const PieceClass = pieceConvert[currentPiece[1]];
+  if (currentPiece[1] == "p") {
+    if (
+      !Pawn.isValidMove(pieces, oldRow, oldCol, newRow, newCol, turn, prevMove)
+    ) {
+      return false;
+    }
+  } else {
+    const PieceClass = pieceConvert[currentPiece[1]];
 
-  if (!PieceClass.isValidMove(pieces, oldRow, oldCol, newRow, newCol, turn)) {
-    return false;
+    if (!PieceClass.isValidMove(pieces, oldRow, oldCol, newRow, newCol, turn)) {
+      return false;
+    }
   }
 
   const nextPieces = pieces.map((row, rowIndex) =>
@@ -267,6 +281,34 @@ export const constructCastleBoard = (
         return king;
       } else if (rowIndex === oldRow && colIndex === rookNewCol) {
         return rook;
+      } else {
+        return piece;
+      }
+    })
+  );
+  return nextPieces;
+};
+
+export const constructEnPassantBoard = (
+  pieces,
+  oldRow,
+  oldCol,
+  newRow,
+  newCol
+) => {
+  let takenPawnRow = oldRow;
+  let takenPawnCol = newCol;
+
+  const pawn = pieces[oldRow][oldCol];
+
+  const nextPieces = pieces.map((row, rowIndex) =>
+    row.map((piece, colIndex) => {
+      if (rowIndex === oldRow && colIndex === oldCol) {
+        return null;
+      } else if (rowIndex === takenPawnRow && colIndex === takenPawnCol) {
+        return null;
+      } else if (rowIndex === newRow && colIndex === newCol) {
+        return pawn;
       } else {
         return piece;
       }

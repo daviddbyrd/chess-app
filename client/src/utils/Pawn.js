@@ -1,7 +1,7 @@
 import { isCheck, constructBoard } from "./Helper";
 
 export const Pawn = {
-  isValidMove: (pieces, oldRow, oldCol, newRow, newCol, turn) => {
+  isValidMove: (pieces, oldRow, oldCol, newRow, newCol, turn, prevMove) => {
     if (turn === "w") {
       if (pieces[newRow][newCol]) {
         if (pieces[newRow][newCol][0] === "w") {
@@ -16,7 +16,17 @@ export const Pawn = {
           return false;
         }
       } else {
-        if (oldCol != newCol) {
+        if (oldRow === 4 && newRow === 5 && Math.abs(oldCol - newCol) === 1) {
+          if (
+            pieces[newRow - 1][newCol] &&
+            pieces[newRow - 1][newCol][1] === "p" &&
+            prevMove === `${newRow + 1}${newCol}${newRow - 1}${newCol}`
+          ) {
+            return true;
+          } else {
+            return false;
+          }
+        } else if (oldCol != newCol) {
           return false;
         }
         if (oldRow == 1) {

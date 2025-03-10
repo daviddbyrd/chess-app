@@ -15,6 +15,9 @@ const pieceConvert = {
 };
 
 export const constructBoard = (pieces, oldRow, oldCol, newRow, newCol) => {
+  if (pieces[oldRow][oldCol][1] === "k" && Math.abs(oldCol - newCol) > 1) {
+    return constructCastleBoard(pieces, oldRow, oldCol, newRow, newCol);
+  }
   const newPiece = pieces[oldRow][oldCol];
   const nextPieces = pieces.map((row, rowIndex) =>
     row.map((piece, colIndex) => {
@@ -142,8 +145,12 @@ export const isCheck = (pieces, turn) => {
 };
 
 export const isValidMove = (...args) => {
-  const [pieces, oldRow, oldCol, newRow, newCol, turn] = args;
+  const [pieces, oldRow, oldCol, newRow, newCol, turn, moved] = args;
   const currentPiece = pieces[oldRow][oldCol];
+
+  if (isValidCastle(...args)) {
+    return true;
+  }
 
   if (!currentPiece || currentPiece[0] !== turn) {
     return false;
@@ -151,7 +158,7 @@ export const isValidMove = (...args) => {
 
   const PieceClass = pieceConvert[currentPiece[1]];
 
-  if (!PieceClass.isValidMove(...args)) {
+  if (!PieceClass.isValidMove(pieces, oldRow, oldCol, newRow, newCol, turn)) {
     return false;
   }
 
@@ -188,4 +195,88 @@ export const isCheckmate = (pieces, turn) => {
     }
   }
   return true;
+};
+
+export const isValidCastle = (
+  pieces,
+  oldRow,
+  oldCol,
+  newRow,
+  newCol,
+  turn,
+  moved
+) => {
+  console.log(moved);
+  if (pieces[oldRow][oldCol][1] !== "k") {
+    return false;
+  }
+
+  let kingCode = `${oldRow}${pieces[oldRow][oldCol]}`;
+  if (moved.has(kingCode)) {
+    return false;
+  }
+
+  if (newCol === 6) {
+    let rookCode = `7${turn}r`;
+    if (moved.has(rookCode)) {
+      return false;
+    }
+    for (let i = 5; i < 7; i++) {
+      if (pieces[oldRow][i]) {
+        console.log(i);
+        return false;
+      }
+    }
+    return true;
+  } else if (newCol == 2) {
+    let rookCode = `0${turn}r`;
+    if (moved.has(rookCode)) {
+      return false;
+    }
+    for (let i = 3; i > 0; i--) {
+      if (pieces[oldRow][i]) {
+        return false;
+      }
+    }
+    return true;
+  } else {
+    return false;
+  }
+};
+
+export const constructCastleBoard = (
+  pieces,
+  oldRow,
+  oldCol,
+  newRow,
+  newCol
+) => {
+  let rookOldCol = 0;
+  let rookNewCol = 0;
+
+  if (newCol === 6) {
+    rookOldCol = 7;
+    rookNewCol = 5;
+  } else {
+    rookOldCol = 0;
+    rookNewCol = 3;
+  }
+  const king = pieces[oldRow][oldCol];
+  const rook = `${pieces[oldRow][oldCol][0]}r`;
+  const nextPieces = pieces.map((row, rowIndex) =>
+    row.map((piece, colIndex) => {
+      if (rowIndex === oldRow && colIndex === oldCol) {
+        return null;
+      } else if (rowIndex === oldRow && colIndex === rookOldCol) {
+        return null;
+      } else if (rowIndex === newRow && colIndex === newCol) {
+        return king;
+      } else if (rowIndex === oldRow && colIndex === rookNewCol) {
+        return rook;
+      } else {
+        return piece;
+      }
+    })
+  );
+  return nextPieces;
 };

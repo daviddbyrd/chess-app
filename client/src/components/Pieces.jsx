@@ -20,9 +20,18 @@ const Pieces = () => {
   ]);
   const [currentPiece, setCurrentPiece] = useState(null);
   const [currentTurn, setCurrentTurn] = useState("w");
+  const [moved, setMoved] = useState(new Set());
 
   const movePiece = (oldRow, oldCol, newRow, newCol) => {
-    if (isValidMove(pieces, oldRow, oldCol, newRow, newCol, currentTurn)) {
+    if (
+      isValidMove(pieces, oldRow, oldCol, newRow, newCol, currentTurn, moved)
+    ) {
+      if ("kr".includes(pieces[oldRow][oldCol][1])) {
+        let code = `${oldRow}${pieces[oldRow][oldCol]}`;
+        if (!moved.has(code)) {
+          setMoved((prevMoved) => prevMoved.add(code));
+        }
+      }
       const nextPieces = constructBoard(pieces, oldRow, oldCol, newRow, newCol);
       setPieces(nextPieces);
 

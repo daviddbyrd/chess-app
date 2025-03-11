@@ -94,24 +94,27 @@ const Pieces = () => {
   const handleDragOver = (e) => e.preventDefault();
 
   return (
-    <div
-      className="grid grid-cols-8 absolute"
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-    >
-      {pieces.toReversed().map((row, reversedIndex) => {
-        const rowIndex = 7 - reversedIndex;
-        return row.map((piece, colIndex) => (
-          <Piece
-            key={`${rowIndex}-${colIndex}`}
-            row={rowIndex}
-            col={colIndex}
-            piece={piece}
-            handleClick={handleClick}
-          />
-        ));
-      })}
-    </div>
+    <>
+      {promoting && <PromotionMenu row={promoting.row} col={promoting.col} />}
+      <div
+        className="grid grid-cols-8 absolute"
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+      >
+        {pieces.toReversed().map((row, reversedIndex) => {
+          const rowIndex = 7 - reversedIndex;
+          return row.map((piece, colIndex) => (
+            <Piece
+              key={`${rowIndex}-${colIndex}`}
+              row={rowIndex}
+              col={colIndex}
+              piece={piece}
+              handleClick={handleClick}
+            />
+          ));
+        })}
+      </div>
+    </>
   );
 };
 

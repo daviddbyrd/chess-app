@@ -1,11 +1,6 @@
 import { useState, useEffect } from "react";
 import Piece from "./Piece.jsx";
-import {
-  isValidMove,
-  isCheck,
-  isCheckmate,
-  constructBoard,
-} from "../utils/Helper.js";
+import { isValidMove, isCheckmate, constructBoard } from "../utils/Helper.js";
 
 const Pieces = () => {
   const [pieces, setPieces] = useState([

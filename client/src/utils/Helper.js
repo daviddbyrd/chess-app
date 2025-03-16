@@ -39,6 +39,19 @@ export const constructBoard = (pieces, oldRow, oldCol, newRow, newCol) => {
   return nextPieces;
 };
 
+export const constructBoardPromotion = (pieces, newRow, newCol, newPiece) => {
+  const nextPieces = pieces.map((row, rowIndex) =>
+    row.map((piece, colIndex) => {
+      if (rowIndex === newRow && colIndex === newCol) {
+        return newPiece;
+      } else {
+        return piece;
+      }
+    })
+  );
+  return nextPieces;
+};
+
 export const isCheck = (pieces, turn) => {
   for (let row = 0; row < 8; ++row) {
     for (let col = 0; col < 8; ++col) {
@@ -47,6 +60,15 @@ export const isCheck = (pieces, turn) => {
       }
     }
   }
+};
+
+export const isPromoting = (pieces) => {
+  for (let col = 0; col < 8; ++col) {
+    if (pieces[0][col] === "bp" || pieces[7][col] === "wp") {
+      return true;
+    }
+  }
+  return false;
 };
 
 export const isTargeted = (pieces, turn, targRow, targCol) => {
@@ -315,4 +337,9 @@ export const constructEnPassantBoard = (
     })
   );
   return nextPieces;
+};
+
+export const getSquareSize = (boardRef) => {
+  const boardRect = boardRef.current.getBoundingClientRect();
+  return boardRect.width / 8;
 };

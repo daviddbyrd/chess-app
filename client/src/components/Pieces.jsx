@@ -1,6 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Piece from "./Piece.jsx";
-import { isValidMove, isCheckmate, constructBoard } from "../utils/Helper.js";
+import PromotionMenu from "./PromotionMenu.jsx";
+import {
+  isValidMove,
+  isCheckmate,
+  constructBoard,
+  constructBoardPromotion,
+  isPromoting,
+  getSquareSize,
+} from "../utils/Helper.js";
 
 const Pieces = () => {
   const [pieces, setPieces] = useState([
@@ -13,13 +21,16 @@ const Pieces = () => {
     ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
     ["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"],
   ]);
+  const boardRef = useRef(null);
   const [currentPiece, setCurrentPiece] = useState(null);
   const [currentTurn, setCurrentTurn] = useState("w");
   const [moved, setMoved] = useState(new Set());
   const [prevMove, setPrevMove] = useState(null);
+  const [promoting, setPromoting] = useState(false);
 
   const movePiece = (oldRow, oldCol, newRow, newCol) => {
     if (
+      !promoting &&
       isValidMove(
         pieces,
         oldRow,
@@ -40,11 +51,16 @@ const Pieces = () => {
       const nextPieces = constructBoard(pieces, oldRow, oldCol, newRow, newCol);
       setPieces(nextPieces);
       setPrevMove(`${oldRow}${oldCol}${newRow}${newCol}`);
-
-      if (currentTurn === "b") {
-        setCurrentTurn("w");
+      console.log(`Is Promoting: ${isPromoting(pieces)}`);
+      if (isPromoting(nextPieces)) {
+        setPromoting({ row: newRow, col: newCol });
+        console.log("ispromoting");
       } else {
-        setCurrentTurn("b");
+        if (currentTurn === "b") {
+          setCurrentTurn("w");
+        } else {
+          setCurrentTurn("b");
+        }
       }
     }
     setCurrentPiece(null);
@@ -58,7 +74,7 @@ const Pieces = () => {
   }, [currentTurn]);
 
   const handleClick = (row, col, piece) => {
-    if (currentPiece) {
+    if (currentPiece && !promoting) {
       movePiece(currentPiece.row, currentPiece.col, row, col);
     } else {
       if (piece) {
@@ -88,14 +104,34 @@ const Pieces = () => {
 
   const handleDragOver = (e) => e.preventDefault();
 
+  const handlePromotionClick = (row, col, piece) => {
+    const nextPieces = constructBoardPromotion(pieces, row, col, piece);
+    setPieces(nextPieces);
+    setPromoting(false);
+    if (currentTurn === "b") {
+      setCurrentTurn("w");
+    } else {
+      setCurrentTurn("b");
+    }
+  };
+
   return (
     <>
-      {promoting && <PromotionMenu row={promoting.row} col={promoting.col} />}
       <div
-        className="grid grid-cols-8 absolute"
+        ref={boardRef}
+        className="grid grid-cols-8 relative"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
+        {promoting !== false && (
+          <PromotionMenu
+            row={promoting.row}
+            col={promoting.col}
+            turn={currentTurn}
+            width={getSquareSize(boardRef)}
+            handlePromotionClick={handlePromotionClick}
+          />
+        )}
         {pieces.toReversed().map((row, reversedIndex) => {
           const rowIndex = 7 - reversedIndex;
           return row.map((piece, colIndex) => (

@@ -29,8 +29,8 @@ export const Pawn = {
         } else if (oldCol != newCol) {
           return false;
         }
-        if (oldRow == 1) {
-          if (2 <= newRow <= 3) {
+        if (oldRow === 1) {
+          if (2 <= newRow && newRow <= 3) {
             return true;
           } else {
             return false;
@@ -60,8 +60,8 @@ export const Pawn = {
         if (oldCol != newCol) {
           return false;
         }
-        if (oldRow == 6) {
-          if (4 <= newRow <= 5) {
+        if (oldRow === 6) {
+          if (4 <= newRow && newRow <= 5) {
             return true;
           } else {
             return false;

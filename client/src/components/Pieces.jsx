@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Piece from "./Piece.jsx";
 import PromotionMenu from "./PromotionMenu.jsx";
+import EndPage from "./EndPage.jsx";
 import {
   isValidMove,
   isCheckmate,
@@ -8,25 +9,19 @@ import {
   constructBoardPromotion,
   isPromoting,
   getSquareSize,
+  isStalemate,
 } from "../utils/Helper.js";
+import { defaultPieces } from "../utils/DefaultPieces.js";
 
 const Pieces = () => {
-  const [pieces, setPieces] = useState([
-    ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"],
-    ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
-    Array(8).fill(null),
-    Array(8).fill(null),
-    Array(8).fill(null),
-    Array(8).fill(null),
-    ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
-    ["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"],
-  ]);
+  const [pieces, setPieces] = useState(defaultPieces);
   const boardRef = useRef(null);
   const [currentPiece, setCurrentPiece] = useState(null);
   const [currentTurn, setCurrentTurn] = useState("w");
   const [moved, setMoved] = useState(new Set());
   const [prevMove, setPrevMove] = useState(null);
   const [promoting, setPromoting] = useState(false);
+  const [gamestate, setGamestate] = useState(null);
 
   const movePiece = (oldRow, oldCol, newRow, newCol) => {
     if (
@@ -68,8 +63,9 @@ const Pieces = () => {
 
   useEffect(() => {
     if (isCheckmate(pieces, currentTurn)) {
-      console.log("checkmate");
-      setCheckmate(true);
+      setGamestate("checkmate");
+    } else if (isStalemate(pieces, currentTurn)) {
+      setGamestate("stalemate");
     }
   }, [currentTurn]);
 
@@ -115,14 +111,23 @@ const Pieces = () => {
     }
   };
 
+  const rematch = () => {
+    setPieces(defaultPieces);
+    setGamestate(null);
+    setCurrentTurn("w");
+  };
+
   return (
     <>
       <div
         ref={boardRef}
-        className="grid grid-cols-8 relative"
+        className="grid grid-cols-8 absolute w-full"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
+        {gamestate !== null && (
+          <EndPage state={gamestate} turn={currentTurn} rematch={rematch} />
+        )}
         {promoting !== false && (
           <PromotionMenu
             row={promoting.row}

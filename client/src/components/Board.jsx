@@ -1,11 +1,12 @@
 import Square from "./Square.jsx";
+import Pieces from "./Pieces.jsx";
 
 const Board = () => {
   const rows = 8;
   const cols = 8;
 
   return (
-    <div className="grid grid-cols-8 absolute">
+    <div className="grid grid-cols-8 absolute w-full">
       {Array.from({ length: rows }).map((_, rowIndex) =>
         Array.from({ length: cols }).map((_, colIndex) => (
           <Square

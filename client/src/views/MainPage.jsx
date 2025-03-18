@@ -4,9 +4,11 @@ import Pieces from "../components/Pieces";
 
 const MainPage = () => {
   return (
-    <div className="flex items-center justify-center h-screen">
-      <Board />
-      <Pieces />
+    <div className="flex items-center justify-center h-screen w-screen">
+      <div className="h-3/10 w-3/10 absolute">
+        <Board />
+        <Pieces />
+      </div>
     </div>
   );
 };

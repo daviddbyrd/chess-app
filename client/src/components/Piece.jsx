@@ -1,6 +1,9 @@
-import React from "react";
+import { React, useState } from "react";
 
 const Piece = ({ row, col, piece, handleClick }) => {
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isDragged, setIsDragged] = useState(false);
+
   const handleDragStart = (e) => {
     e.dataTransfer.setData("text/plain", `${piece}${row}${col}`);
     const img = new Image();
@@ -15,12 +18,17 @@ const Piece = ({ row, col, piece, handleClick }) => {
 
   return (
     <div
-      className="aspect-square bg-cover bg-center cursor-grab active:cursor-grabbing"
+      className={`aspect-square bg-cover bg-center cursor-grab border-3 active:cursor-grabbing 
+        ${isDragOver ? "border-gray-400" : "border-transparent"}
+      `}
       style={{ backgroundImage: `url('../../${piece}.png')` }}
       onClick={() => handleClick(row, col, piece)}
       draggable="true"
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onDragOver={() => setIsDragOver(true)}
+      onDragLeave={() => setIsDragOver(false)}
+      onDrop={() => setIsDragOver(false)}
     ></div>
   );
 };

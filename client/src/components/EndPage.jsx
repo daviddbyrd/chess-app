@@ -5,7 +5,7 @@ const EndPage = ({ state, turn, rematch }) => {
   console.log(turn);
   const convert = { w: "Black", b: "White" };
   return (
-    <div className="absolute inset-0 m-auto w-60 h-80 bg-white flex flex-col justify-center items-center rounded-xl shadow-lg">
+    <div className="absolute inset-0 m-auto w-80 h-90 bg-white flex flex-col justify-center items-center rounded-xl shadow-lg">
       {state === "checkmate" ? (
         <div className="text-center mt-20 text-4xl text-gray-900">
           {convert[turn]} wins by Checkmate

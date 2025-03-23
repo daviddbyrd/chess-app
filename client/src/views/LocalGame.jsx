@@ -1,5 +1,4 @@
 import React from "react";
-import Board from "../components/Board";
 import Pieces from "../components/Pieces";
 
 const LocalGame = () => {
@@ -8,8 +7,7 @@ const LocalGame = () => {
       <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-blue-200/30 blur-3xl"></div>
       <div className="absolute -right-20 bottom-40 h-80 w-80 rounded-full bg-purple-100/30 blur-3xl"></div>
       <div className="absolute bottom-10 left-40 h-80 w-80 rounded-full bg-pink-100/30 blur-3xl"></div>
-      <div className="h-130 w-130 absolute border-white/80 border-5">
-        <Board />
+      <div className="flex flex-col items-center justify-center h-screen">
         <Pieces />
       </div>
     </div>

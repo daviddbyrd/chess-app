@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Piece from "./Piece.jsx";
+import PieceIcon from "./PieceIcon.jsx";
 import PromotionMenu from "./PromotionMenu.jsx";
 import EndPage from "./EndPage.jsx";
 import {
@@ -13,6 +14,7 @@ import {
   findTakenPiece,
 } from "../utils/Helper.js";
 import { defaultPieces } from "../utils/DefaultPieces.js";
+import Board from "./Board.jsx";
 
 const Pieces = () => {
   const [pieces, setPieces] = useState(defaultPieces);
@@ -58,12 +60,16 @@ const Pieces = () => {
       );
       if (takenPiece) {
         let colour = takenPiece[0];
-        setTakenPieces((prev) => ({ ...prev, [colour]: [...prev[colour]] }));
+        console.log("HELLO");
+        setTakenPieces((prev) => ({
+          ...prev,
+          [colour]: [...prev[colour], takenPiece],
+        }));
       }
       const nextPieces = constructBoard(pieces, oldRow, oldCol, newRow, newCol);
       setPieces(nextPieces);
       setPrevMove(`${oldRow}${oldCol}${newRow}${newCol}`);
-      console.log(takenPieces.b);
+      console.log(takenPieces);
       console.log(takenPiece);
       console.log(oldCol);
       console.log(newCol);
@@ -139,59 +145,53 @@ const Pieces = () => {
 
   return (
     <>
-      {takenPieces.b.map((piece, i) => (
-        <Piece
-          key={`${rowIndex}-${colIndex}`}
-          row={rowIndex}
-          col={colIndex}
-          piece={piece}
-          handleClick={handleClick}
-          className="w-5 h-5"
-        ></Piece>
-      ))}
-      <div
-        ref={boardRef}
-        className="grid grid-cols-8 absolute w-8/10 top-1/10 left-1/10"
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-      >
-        {gamestate !== null && (
-          <EndPage state={gamestate} turn={currentTurn} rematch={rematch} />
-        )}
-        {promoting !== false && (
-          <PromotionMenu
-            row={promoting.row}
-            col={promoting.col}
-            turn={currentTurn}
-            width={getSquareSize(boardRef)}
-            handlePromotionClick={handlePromotionClick}
-          />
-        )}
-        {pieces.toReversed().map((row, reversedIndex) => {
-          const rowIndex = 7 - reversedIndex;
-          return row.map((piece, colIndex) => (
-            <Piece
-              key={`${rowIndex}-${colIndex}`}
-              row={rowIndex}
-              col={colIndex}
-              piece={piece}
-              handleClick={handleClick}
-            />
-          ));
-        })}
+      <div className="relative w-full">
+        <div className="grid grid-flow-col h-10 justify-start">
+          {takenPieces.w.map((piece, i) => (
+            <PieceIcon key={`${i}`} piece={piece}></PieceIcon>
+          ))}
+        </div>
       </div>
-      <div className="grid grid-rows-1 absolute w-1/10 t-1/10">
-        {takenPieces.b}
-        {takenPieces.b.map((piece, i) => (
-          <Piece
-            key={`${i}`}
-            row={rowIndex}
-            col={colIndex}
-            piece={piece}
-            handleClick={handleClick}
-            className="w-5 h-5"
-          ></Piece>
-        ))}
+      <div className="h-130 w-130 relative border-white/80 border-5">
+        <Board />
+        <div
+          ref={boardRef}
+          className="grid grid-cols-8 w-full absolute inset-0"
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+        >
+          {gamestate !== null && (
+            <EndPage state={gamestate} turn={currentTurn} rematch={rematch} />
+          )}
+          {promoting !== false && (
+            <PromotionMenu
+              row={promoting.row}
+              col={promoting.col}
+              turn={currentTurn}
+              width={getSquareSize(boardRef)}
+              handlePromotionClick={handlePromotionClick}
+            />
+          )}
+          {pieces.toReversed().map((row, reversedIndex) => {
+            const rowIndex = 7 - reversedIndex;
+            return row.map((piece, colIndex) => (
+              <Piece
+                key={`${rowIndex}-${colIndex}`}
+                row={rowIndex}
+                col={colIndex}
+                piece={piece}
+                handleClick={handleClick}
+              />
+            ));
+          })}
+        </div>
+      </div>
+      <div className="relative w-full">
+        <div className="grid grid-flow-col h-10 justify-start">
+          {takenPieces.b.map((piece, i) => (
+            <PieceIcon key={`${i}`} piece={piece}></PieceIcon>
+          ))}
+        </div>
       </div>
     </>
   );

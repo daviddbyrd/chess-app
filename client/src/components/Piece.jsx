@@ -2,7 +2,6 @@ import { React, useState } from "react";
 
 const Piece = ({ row, col, piece, handleClick }) => {
   const [isDragOver, setIsDragOver] = useState(false);
-  const [isDragged, setIsDragged] = useState(false);
 
   const handleDragStart = (e) => {
     e.dataTransfer.setData("text/plain", `${piece}${row}${col}`);

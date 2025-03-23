@@ -10,6 +10,7 @@ import {
   isPromoting,
   getSquareSize,
   isStalemate,
+  findTakenPiece,
 } from "../utils/Helper.js";
 import { defaultPieces } from "../utils/DefaultPieces.js";
 
@@ -22,6 +23,10 @@ const Pieces = () => {
   const [prevMove, setPrevMove] = useState(null);
   const [promoting, setPromoting] = useState(false);
   const [gamestate, setGamestate] = useState(null);
+  const [takenPieces, setTakenPieces] = useState({
+    b: [],
+    w: [],
+  });
 
   const movePiece = (oldRow, oldCol, newRow, newCol) => {
     if (
@@ -43,10 +48,25 @@ const Pieces = () => {
           setMoved((prevMoved) => prevMoved.add(code));
         }
       }
+      const takenPiece = findTakenPiece(
+        pieces,
+        oldRow,
+        oldCol,
+        newRow,
+        newCol,
+        currentTurn
+      );
+      if (takenPiece) {
+        let colour = takenPiece[0];
+        setTakenPieces((prev) => ({ ...prev, [colour]: [...prev[colour]] }));
+      }
       const nextPieces = constructBoard(pieces, oldRow, oldCol, newRow, newCol);
       setPieces(nextPieces);
       setPrevMove(`${oldRow}${oldCol}${newRow}${newCol}`);
-      console.log(`Is Promoting: ${isPromoting(pieces)}`);
+      console.log(takenPieces.b);
+      console.log(takenPiece);
+      console.log(oldCol);
+      console.log(newCol);
       if (isPromoting(nextPieces)) {
         setPromoting({ row: newRow, col: newCol });
         console.log("ispromoting");
@@ -119,9 +139,19 @@ const Pieces = () => {
 
   return (
     <>
+      {takenPieces.b.map((piece, i) => (
+        <Piece
+          key={`${rowIndex}-${colIndex}`}
+          row={rowIndex}
+          col={colIndex}
+          piece={piece}
+          handleClick={handleClick}
+          className="w-5 h-5"
+        ></Piece>
+      ))}
       <div
         ref={boardRef}
-        className="grid grid-cols-8 absolute w-full"
+        className="grid grid-cols-8 absolute w-8/10 top-1/10 left-1/10"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
@@ -149,6 +179,19 @@ const Pieces = () => {
             />
           ));
         })}
+      </div>
+      <div className="grid grid-rows-1 absolute w-1/10 t-1/10">
+        {takenPieces.b}
+        {takenPieces.b.map((piece, i) => (
+          <Piece
+            key={`${i}`}
+            row={rowIndex}
+            col={colIndex}
+            piece={piece}
+            handleClick={handleClick}
+            className="w-5 h-5"
+          ></Piece>
+        ))}
       </div>
     </>
   );

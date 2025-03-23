@@ -360,3 +360,24 @@ export const getSquareSize = (boardRef) => {
   const boardRect = boardRef.current.getBoundingClientRect();
   return boardRect.width / 8;
 };
+
+export const findTakenPiece = (
+  pieces,
+  oldRow,
+  oldCol,
+  newRow,
+  newCol,
+  turn
+) => {
+  if (pieces[newRow][newCol]) {
+    return pieces[newRow][newCol];
+  }
+  if (oldCol !== newCol && pieces[oldRow][oldCol][1] === "p") {
+    if (turn === "w") {
+      return "bp";
+    } else {
+      return "wp";
+    }
+  }
+  return null;
+};

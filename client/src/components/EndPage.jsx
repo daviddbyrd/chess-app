@@ -1,8 +1,6 @@
 import React from "react";
 
 const EndPage = ({ state, turn, rematch }) => {
-  console.log(state);
-  console.log(turn);
   const convert = { w: "Black", b: "White" };
   return (
     <div className="absolute inset-0 m-auto w-80 h-90 bg-white flex flex-col justify-center items-center rounded-xl shadow-lg">

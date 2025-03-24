@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import Piece from "./Piece.jsx";
-import PieceIcon from "./PieceIcon.jsx";
-import PromotionMenu from "./PromotionMenu.jsx";
-import EndPage from "./EndPage.jsx";
+import Piece from "../Piece.jsx";
+import PieceIcon from "../PieceIcon.jsx";
+import PromotionMenu from "../PromotionMenu.jsx";
+import EndPage from "../EndPage.jsx";
 import {
   isValidMove,
   isCheckmate,
@@ -12,11 +12,13 @@ import {
   getSquareSize,
   isStalemate,
   findTakenPiece,
-} from "../utils/Helper.js";
-import { defaultPieces } from "../utils/DefaultPieces.js";
-import Board from "./Board.jsx";
+} from "../../utils/Helper.js";
+import { defaultPieces } from "../../utils/DefaultPieces.js";
+import Board from "../Board.jsx";
+import MoveSoundEffect from "../../assets/move.mp3";
+import CaptureSoundEffect from "../../assets/capture.mp3";
 
-const Pieces = () => {
+const LocalPieces = () => {
   const [pieces, setPieces] = useState(defaultPieces);
   const boardRef = useRef(null);
   const [currentPiece, setCurrentPiece] = useState(null);
@@ -29,6 +31,8 @@ const Pieces = () => {
     b: [],
     w: [],
   });
+  const captureSound = new Audio(CaptureSoundEffect);
+  const moveSound = new Audio(MoveSoundEffect);
 
   const movePiece = (oldRow, oldCol, newRow, newCol) => {
     if (
@@ -60,22 +64,23 @@ const Pieces = () => {
       );
       if (takenPiece) {
         let colour = takenPiece[0];
-        console.log("HELLO");
-        setTakenPieces((prev) => ({
-          ...prev,
-          [colour]: [...prev[colour], takenPiece],
-        }));
+        captureSound.play();
+        setTakenPieces((prev) => {
+          const newTakenPieces = [...prev[colour], takenPiece];
+          newTakenPieces.sort((a, b) => a - b);
+          return {
+            ...prev,
+            [colour]: newTakenPieces,
+          };
+        });
+      } else {
+        moveSound.play();
       }
       const nextPieces = constructBoard(pieces, oldRow, oldCol, newRow, newCol);
       setPieces(nextPieces);
       setPrevMove(`${oldRow}${oldCol}${newRow}${newCol}`);
-      console.log(takenPieces);
-      console.log(takenPiece);
-      console.log(oldCol);
-      console.log(newCol);
       if (isPromoting(nextPieces)) {
         setPromoting({ row: newRow, col: newCol });
-        console.log("ispromoting");
       } else {
         if (currentTurn === "b") {
           setCurrentTurn("w");
@@ -152,7 +157,7 @@ const Pieces = () => {
           ))}
         </div>
       </div>
-      <div className="h-130 w-130 relative border-white/80 border-5">
+      <div className="h-130 w-130 relative border-white/80 border-10">
         <Board />
         <div
           ref={boardRef}
@@ -197,4 +202,4 @@ const Pieces = () => {
   );
 };
 
-export default Pieces;
+export default LocalPieces;

@@ -1,4 +1,5 @@
 import React from "react";
+import ComputerPieces from "../components/ComputerGameComponents/ComputerPieces";
 
 const LocalGame = () => {
   return (
@@ -6,7 +7,9 @@ const LocalGame = () => {
       <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-blue-200/30 blur-3xl"></div>
       <div className="absolute -right-20 bottom-40 h-80 w-80 rounded-full bg-purple-100/30 blur-3xl"></div>
       <div className="absolute bottom-10 left-40 h-80 w-80 rounded-full bg-pink-100/30 blur-3xl"></div>
-      <div className="flex flex-col items-center justify-center h-screen"></div>
+      <div className="flex flex-col items-center justify-center h-screen">
+        <ComputerPieces />
+      </div>
     </div>
   );
 };

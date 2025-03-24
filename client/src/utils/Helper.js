@@ -72,6 +72,7 @@ export const isPromoting = (pieces) => {
 };
 
 export const isTargeted = (pieces, turn, targRow, targCol) => {
+  console.log(turn);
   const diag = [
     [1, 1],
     [1, -1],
@@ -85,10 +86,12 @@ export const isTargeted = (pieces, turn, targRow, targCol) => {
     let c = targCol + cdif;
     while (0 <= r && r < 8 && 0 <= c && c < 8) {
       if (pieces[r][c]) {
-        if (pieces[r][c][0] === turn) {
+        if (pieces[r][c] !== turn) {
           break;
         } else if (pieces[r][c][1] === "q" || pieces[r][c][1] === "b") {
           return true;
+        } else {
+          break;
         }
       }
       r += rdif;
@@ -113,6 +116,8 @@ export const isTargeted = (pieces, turn, targRow, targCol) => {
           break;
         } else if (pieces[r][c][1] === "q" || pieces[r][c][1] === "r") {
           return true;
+        } else {
+          break;
         }
       }
       r += rdif;

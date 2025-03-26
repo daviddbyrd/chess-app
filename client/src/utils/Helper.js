@@ -72,7 +72,6 @@ export const isPromoting = (pieces) => {
 };
 
 export const isTargeted = (pieces, turn, targRow, targCol) => {
-  console.log(turn);
   const diag = [
     [1, 1],
     [1, -1],
@@ -174,10 +173,29 @@ export const isTargeted = (pieces, turn, targRow, targCol) => {
 };
 
 export const isValidMove = (...args) => {
-  const [pieces, oldRow, oldCol, newRow, newCol, turn, moved, prevMove] = args;
+  const [
+    pieces,
+    oldRow,
+    oldCol,
+    newRow,
+    newCol,
+    turn,
+    castlingAvailability,
+    prevMove,
+  ] = args;
   const currentPiece = pieces[oldRow][oldCol];
 
-  if (isValidCastle(...args)) {
+  if (
+    isValidCastle(
+      pieces,
+      oldRow,
+      oldCol,
+      newRow,
+      newCol,
+      turn,
+      castlingAvailability
+    )
+  ) {
     return true;
   }
 
@@ -258,21 +276,21 @@ export const isValidCastle = (
   newRow,
   newCol,
   turn,
-  moved
+  castlingAvailability
 ) => {
   if (pieces[oldRow][oldCol][1] !== "k") {
     return false;
   }
 
-  let kingCode = `${oldRow}${pieces[oldRow][oldCol]}`;
-  if (moved.has(kingCode)) {
-    return false;
-  }
-
   if (newCol === 6) {
-    let rookCode = `7${turn}r`;
-    if (moved.has(rookCode)) {
-      return false;
+    if (pieces[oldRow][oldCol][0] === "w") {
+      if (!(oldRow === 0 && newRow === 0 && castlingAvailability[0] === "K")) {
+        return false;
+      }
+    } else {
+      if (!(oldRow === 7 && newRow === 7 && castlingAvailability[2] === "k")) {
+        return false;
+      }
     }
     for (let i = 5; i < 7; i++) {
       if (pieces[oldRow][i] || isTargeted(pieces, turn, oldRow, i)) {
@@ -281,11 +299,16 @@ export const isValidCastle = (
     }
     return true;
   } else if (newCol == 2) {
-    let rookCode = `0${turn}r`;
-    if (moved.has(rookCode)) {
-      return false;
+    if (pieces[oldRow][oldCol][0] === "w") {
+      if (!(oldRow === 0 && newRow === 0 && castlingAvailability[1] === "Q")) {
+        return false;
+      }
+    } else {
+      if (!(oldRow === 7 && newRow === 7 && castlingAvailability[3] === "q")) {
+        return false;
+      }
     }
-    for (let i = 3; i > 0; i--) {
+    for (let i = 5; i < 7; i++) {
       if (pieces[oldRow][i] || isTargeted(pieces, turn, oldRow, i)) {
         return false;
       }
@@ -385,4 +408,28 @@ export const findTakenPiece = (
     }
   }
   return null;
+};
+
+export const convertCastlingAvailability = (piece, col) => {
+  if (piece[0] === "w") {
+    if (piece[1] === "k") {
+      return [0, 1];
+    } else {
+      if (col === 0) {
+        return [1];
+      } else {
+        return [0];
+      }
+    }
+  } else {
+    if (piece[1] === "k") {
+      return [2, 3];
+    } else {
+      if (col == 0) {
+        return [2];
+      } else {
+        return [3];
+      }
+    }
+  }
 };

@@ -12,6 +12,7 @@ import {
   getSquareSize,
   isStalemate,
   findTakenPiece,
+  convertCastlingAvailability,
 } from "../../utils/Helper.js";
 import { defaultPieces } from "../../utils/DefaultPieces.js";
 import Board from "../Board.jsx";
@@ -24,7 +25,12 @@ const ComputerPieces = () => {
   const boardRef = useRef(null);
   const [currentPiece, setCurrentPiece] = useState(null);
   const [currentTurn, setCurrentTurn] = useState("w");
-  const [moved, setMoved] = useState(new Set());
+  const [castlingAvailability, setCastlingAvailability] = useState([
+    "K",
+    "Q",
+    "k",
+    "q",
+  ]);
   const [prevMove, setPrevMove] = useState(null);
   const [promoting, setPromoting] = useState(false);
   const [gamestate, setGamestate] = useState(null);
@@ -47,20 +53,26 @@ const ComputerPieces = () => {
         newRow,
         newCol,
         currentTurn,
-        moved,
+        castlingAvailability,
         prevMove
       )
     ) {
-      if (pieces[oldRow][oldCol][0] !== playerColour) {
-        setCurrentPiece(null);
-        return;
-      }
+      // if (pieces[oldRow][oldCol][0] !== playerColour) {
+      //   setCurrentPiece(null);
+      //   return;
+      // }
 
       if ("kr".includes(pieces[oldRow][oldCol][1])) {
-        let code = `${oldRow}${pieces[oldRow][oldCol]}`;
-        if (!moved.has(code)) {
-          setMoved((prevMoved) => prevMoved.add(code));
-        }
+        let changedIndices = convertCastlingAvailability(
+          pieces[oldRow][oldCol],
+          oldCol
+        );
+        setCastlingAvailability((prev) => {
+          changedIndices.forEach((i) => {
+            prev[i] = "-";
+          });
+          return prev;
+        });
       }
       const takenPiece = findTakenPiece(
         pieces,

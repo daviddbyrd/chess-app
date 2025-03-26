@@ -13,6 +13,8 @@ import {
   isStalemate,
   findTakenPiece,
   convertCastlingAvailability,
+  isEnPassantTarget,
+  fenConvertor,
 } from "../../utils/Helper.js";
 import { defaultPieces } from "../../utils/DefaultPieces.js";
 import Board from "../Board.jsx";
@@ -31,7 +33,7 @@ const ComputerPieces = () => {
     "k",
     "q",
   ]);
-  const [prevMove, setPrevMove] = useState(null);
+  const [enPassantAvailability, setEnPassantAvailabillity] = useState(null);
   const [promoting, setPromoting] = useState(false);
   const [gamestate, setGamestate] = useState(null);
   const [takenPieces, setTakenPieces] = useState({
@@ -54,7 +56,7 @@ const ComputerPieces = () => {
         newCol,
         currentTurn,
         castlingAvailability,
-        prevMove
+        enPassantAvailability
       )
     ) {
       // if (pieces[oldRow][oldCol][0] !== playerColour) {
@@ -74,6 +76,13 @@ const ComputerPieces = () => {
           return prev;
         });
       }
+
+      if (isEnPassantTarget(pieces, oldRow, oldCol, newRow, newCol)) {
+        setEnPassantAvailabillity(`${newCol}${newRow}`);
+      } else {
+        setEnPassantAvailabillity(null);
+      }
+
       const takenPiece = findTakenPiece(
         pieces,
         oldRow,
@@ -123,6 +132,14 @@ const ComputerPieces = () => {
   };
 
   useEffect(() => {
+    fenConvertor(
+      pieces,
+      currentTurn,
+      castlingAvailability,
+      enPassantAvailability,
+      halfMoveClock,
+      turnCount
+    );
     if (isCheckmate(pieces, currentTurn)) {
       setGamestate("checkmate");
     } else if (isStalemate(pieces, currentTurn)) {

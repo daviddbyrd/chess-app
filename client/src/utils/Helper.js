@@ -181,7 +181,7 @@ export const isValidMove = (...args) => {
     newCol,
     turn,
     castlingAvailability,
-    prevMove,
+    enPassantAvailability,
   ] = args;
   const currentPiece = pieces[oldRow][oldCol];
 
@@ -205,7 +205,15 @@ export const isValidMove = (...args) => {
 
   if (currentPiece[1] == "p") {
     if (
-      !Pawn.isValidMove(pieces, oldRow, oldCol, newRow, newCol, turn, prevMove)
+      !Pawn.isValidMove(
+        pieces,
+        oldRow,
+        oldCol,
+        newRow,
+        newCol,
+        turn,
+        enPassantAvailability
+      )
     ) {
       return false;
     }
@@ -432,4 +440,66 @@ export const convertCastlingAvailability = (piece, col) => {
       }
     }
   }
+};
+
+export const getEnPassantTarget = (enPassantAvailability) => {
+  if (enPassantAvailability === null) {
+    return "-";
+  }
+  const col = String.fromCharCode(enPassantAvailability.charCodeAt(0) + 97);
+  const row = String.fromCharCode(enPassantAvailability.charCodeAt(0) + 1);
+  return `${col}${row}`;
+};
+
+export const isEnPassantTarget = (pieces, oldRow, oldCol, newRow, newCol) => {
+  if (pieces[oldRow][oldCol][1] === "p" && Math.abs(oldRow - newRow) > 1) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+export const fenConvertor = (
+  pieces,
+  turn,
+  castlingAvailability,
+  enPassantAvailability,
+  halfMoveClock,
+  turnCount
+) => {
+  let fenString = [];
+  let cur = 0;
+  for (let row = 7; row >= 0; row--) {
+    cur = 0;
+    for (let col = 0; col < 8; col++) {
+      if (pieces[row][col]) {
+        if (cur !== 0) {
+          fenString.push(cur);
+          cur = 0;
+        }
+        if (pieces[row][col][0] === "w") {
+          fenString.push(pieces[row][col][1].toUpperCase());
+        } else {
+          fenString.push(pieces[row][col][1]);
+        }
+      } else {
+        cur += 1;
+      }
+    }
+    if (cur !== 0) {
+      fenString.push(cur);
+    }
+    if (row !== 0) {
+      fenString.push("/");
+    }
+  }
+  fenString.push(` ${turn}`);
+  fenString.push(` ${castlingAvailability.join("")}`);
+
+  const enPassantTarget = getEnPassantTarget(enPassantAvailability);
+  fenString.push(` ${enPassantTarget}`);
+  fenString.push(` ${halfMoveClock}`);
+  fenString.push(` ${turnCount}`);
+  console.log(fenString.join(""));
+  return fenString.join("");
 };

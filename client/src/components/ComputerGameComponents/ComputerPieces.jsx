@@ -32,6 +32,8 @@ const ComputerPieces = () => {
     b: [],
     w: [],
   });
+  const [turnCount, setTurnCount] = useState(1);
+  const [halfMoveClock, setHalfMoveClock] = useState(0);
   const captureSound = new Audio(CaptureSoundEffect);
   const moveSound = new Audio(MoveSoundEffect);
 
@@ -69,8 +71,11 @@ const ComputerPieces = () => {
         currentTurn
       );
       if (takenPiece) {
-        let colour = takenPiece[0];
         captureSound.play();
+
+        setHalfMoveClock(0);
+
+        let colour = takenPiece[0];
         setTakenPieces((prev) => {
           const newTakenPieces = [...prev[colour], takenPiece];
           newTakenPieces.sort((a, b) => a - b);
@@ -81,6 +86,12 @@ const ComputerPieces = () => {
         });
       } else {
         moveSound.play();
+
+        if (pieces[oldRow][oldCol][1] !== "p") {
+          setHalfMoveClock((prev) => prev + 1);
+        } else {
+          setHalfMoveClock(0);
+        }
       }
       const nextPieces = constructBoard(pieces, oldRow, oldCol, newRow, newCol);
       setPieces(nextPieces);
@@ -89,6 +100,7 @@ const ComputerPieces = () => {
         setPromoting({ row: newRow, col: newCol });
       } else {
         if (currentTurn === "b") {
+          setTurnCount((prevTurn) => prevTurn + 1);
           setCurrentTurn("w");
         } else {
           setCurrentTurn("b");

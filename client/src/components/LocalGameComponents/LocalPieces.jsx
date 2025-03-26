@@ -12,6 +12,7 @@ import {
   getSquareSize,
   isStalemate,
   findTakenPiece,
+  convertCastlingAvailability,
 } from "../../utils/Helper.js";
 import { defaultPieces } from "../../utils/DefaultPieces.js";
 import Board from "../Board.jsx";
@@ -23,7 +24,12 @@ const LocalPieces = () => {
   const boardRef = useRef(null);
   const [currentPiece, setCurrentPiece] = useState(null);
   const [currentTurn, setCurrentTurn] = useState("w");
-  const [moved, setMoved] = useState(new Set());
+  const [castlingAvailability, setCastlingAvailability] = useState([
+    "K",
+    "Q",
+    "k",
+    "q",
+  ]);
   const [prevMove, setPrevMove] = useState(null);
   const [promoting, setPromoting] = useState(false);
   const [gamestate, setGamestate] = useState(null);
@@ -31,6 +37,8 @@ const LocalPieces = () => {
     b: [],
     w: [],
   });
+  const [turnCount, setTurnCount] = useState(1);
+  const [halfMoveClock, setHalfMoveClock] = useState(0);
   const captureSound = new Audio(CaptureSoundEffect);
   const moveSound = new Audio(MoveSoundEffect);
 
@@ -44,15 +52,21 @@ const LocalPieces = () => {
         newRow,
         newCol,
         currentTurn,
-        moved,
+        castlingAvailability,
         prevMove
       )
     ) {
       if ("kr".includes(pieces[oldRow][oldCol][1])) {
-        let code = `${oldRow}${pieces[oldRow][oldCol]}`;
-        if (!moved.has(code)) {
-          setMoved((prevMoved) => prevMoved.add(code));
-        }
+        let changedIndices = convertCastlingAvailability(
+          pieces[oldRow][oldCol],
+          oldCol
+        );
+        setCastlingAvailability((prev) => {
+          changedIndices.forEach((i) => {
+            prev[i] = "-";
+          });
+          return prev;
+        });
       }
       const takenPiece = findTakenPiece(
         pieces,
@@ -63,8 +77,11 @@ const LocalPieces = () => {
         currentTurn
       );
       if (takenPiece) {
-        let colour = takenPiece[0];
         captureSound.play();
+
+        setHalfMoveClock(0);
+
+        let colour = takenPiece[0];
         setTakenPieces((prev) => {
           const newTakenPieces = [...prev[colour], takenPiece];
           newTakenPieces.sort((a, b) => a - b);
@@ -75,6 +92,12 @@ const LocalPieces = () => {
         });
       } else {
         moveSound.play();
+
+        if (pieces[oldRow][oldCol][1] !== "p") {
+          setHalfMoveClock((prev) => prev + 1);
+        } else {
+          setHalfMoveClock(0);
+        }
       }
       const nextPieces = constructBoard(pieces, oldRow, oldCol, newRow, newCol);
       setPieces(nextPieces);
@@ -83,6 +106,7 @@ const LocalPieces = () => {
         setPromoting({ row: newRow, col: newCol });
       } else {
         if (currentTurn === "b") {
+          setTurnCount((prevTurn) => prevTurn + 1);
           setCurrentTurn("w");
         } else {
           setCurrentTurn("b");

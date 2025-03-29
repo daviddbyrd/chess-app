@@ -15,6 +15,7 @@ import {
   convertCastlingAvailability,
   isEnPassantTarget,
   fenConvertor,
+  getEngineMove,
 } from "../../utils/Helper.js";
 import { defaultPieces } from "../../utils/DefaultPieces.js";
 import Board from "../Board.jsx";
@@ -59,19 +60,20 @@ const ComputerPieces = () => {
         enPassantAvailability
       )
     ) {
-      // if (pieces[oldRow][oldCol][0] !== playerColour) {
-      //   setCurrentPiece(null);
-      //   return;
-      // }
+      if (pieces[oldRow][oldCol][0] !== playerColour) {
+        setCurrentPiece(null);
+        return;
+      }
 
       if ("kr".includes(pieces[oldRow][oldCol][1])) {
         let changedIndices = convertCastlingAvailability(
           pieces[oldRow][oldCol],
           oldCol
         );
+
         setCastlingAvailability((prev) => {
           changedIndices.forEach((i) => {
-            prev[i] = "-";
+            prev[i] = "";
           });
           return prev;
         });
@@ -116,7 +118,6 @@ const ComputerPieces = () => {
       }
       const nextPieces = constructBoard(pieces, oldRow, oldCol, newRow, newCol);
       setPieces(nextPieces);
-      setPrevMove(`${oldRow}${oldCol}${newRow}${newCol}`);
       if (isPromoting(nextPieces)) {
         setPromoting({ row: newRow, col: newCol });
       } else {
@@ -132,18 +133,29 @@ const ComputerPieces = () => {
   };
 
   useEffect(() => {
-    fenConvertor(
-      pieces,
-      currentTurn,
-      castlingAvailability,
-      enPassantAvailability,
-      halfMoveClock,
-      turnCount
-    );
+    const fetchData = async () => {
+      const fenState = fenConvertor(
+        pieces,
+        currentTurn,
+        castlingAvailability,
+        enPassantAvailability,
+        halfMoveClock,
+        turnCount
+      );
+      const engineMove = await getEngineMove(fenState);
+      const oldCol = engineMove.charCodeAt(0) - 97;
+      const oldRow = engineMove.charCodeAt(1) - 49;
+      const newCol = engineMove.charCodeAt(2) - 97;
+      const newRow = engineMove.charCodeAt(3) - 49;
+      movePiece(oldRow, oldCol, newRow, newCol);
+    };
+
     if (isCheckmate(pieces, currentTurn)) {
       setGamestate("checkmate");
     } else if (isStalemate(pieces, currentTurn)) {
       setGamestate("stalemate");
+    } else if (currentTurn !== playerColour) {
+      fetchData();
     }
   }, [currentTurn]);
 
@@ -178,7 +190,7 @@ const ComputerPieces = () => {
 
   const handleDragOver = (e) => e.preventDefault();
 
-  const handlePromotionClick = (row, col, piece) => {
+  const handlePromotionClick = async (row, col, piece) => {
     const nextPieces = constructBoardPromotion(pieces, row, col, piece);
     setPieces(nextPieces);
     setPromoting(false);

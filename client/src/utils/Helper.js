@@ -4,6 +4,7 @@ import { Rook } from "./Rook";
 import { Knight } from "./Knight";
 import { Queen } from "./Queen";
 import { King } from "./King";
+import axios from "axios";
 
 const pieceConvert = {
   p: Pawn,
@@ -215,12 +216,18 @@ export const isValidMove = (...args) => {
         enPassantAvailability
       )
     ) {
+      console.log("made it here 1");
+      console.log(currentPiece);
+      console.log(oldRow);
+      console.log(oldCol);
+      console.log(pieces);
       return false;
     }
   } else {
     const PieceClass = pieceConvert[currentPiece[1]];
 
     if (!PieceClass.isValidMove(pieces, oldRow, oldCol, newRow, newCol, turn)) {
+      console.log("made it here 2");
       return false;
     }
   }
@@ -446,7 +453,7 @@ export const getEnPassantTarget = (enPassantAvailability) => {
   if (enPassantAvailability === null) {
     return "-";
   }
-  const col = String.fromCharCode(enPassantAvailability.charCodeAt(0) + 97);
+  const col = String.fromCharCode(enPassantAvailability.charCodeAt(0) + 49);
   const row = String.fromCharCode(enPassantAvailability.charCodeAt(0) + 1);
   return `${col}${row}`;
 };
@@ -497,9 +504,23 @@ export const fenConvertor = (
   fenString.push(` ${castlingAvailability.join("")}`);
 
   const enPassantTarget = getEnPassantTarget(enPassantAvailability);
+  console.log(enPassantAvailability);
+  console.log(enPassantTarget);
   fenString.push(` ${enPassantTarget}`);
   fenString.push(` ${halfMoveClock}`);
   fenString.push(` ${turnCount}`);
-  console.log(fenString.join(""));
   return fenString.join("");
+};
+
+export const getEngineMove = async (fenBoard) => {
+  const engineMoveData = await axios.get(
+    "https://stockfish.online/api/s/v2.php",
+    {
+      params: {
+        fen: fenBoard,
+        depth: 5,
+      },
+    }
+  );
+  return engineMoveData.data.continuation;
 };

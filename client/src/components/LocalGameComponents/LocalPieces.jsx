@@ -21,7 +21,6 @@ import MoveSoundEffect from "../../assets/move.mp3";
 import CaptureSoundEffect from "../../assets/capture.mp3";
 
 const LocalPieces = () => {
-  const playerColour = "w";
   const [pieces, setPieces] = useState(defaultPieces);
   const boardRef = useRef(null);
   const [currentPiece, setCurrentPiece] = useState(null);

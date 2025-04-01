@@ -13,13 +13,15 @@ import {
   isStalemate,
   findTakenPiece,
   convertCastlingAvailability,
+  isEnPassantTarget,
 } from "../../utils/Helper.js";
 import { defaultPieces } from "../../utils/DefaultPieces.js";
 import Board from "../Board.jsx";
 import MoveSoundEffect from "../../assets/move.mp3";
 import CaptureSoundEffect from "../../assets/capture.mp3";
 
-const OnlinePieces = () => {
+const LocalPieces = () => {
+  const playerColour = "w";
   const [pieces, setPieces] = useState(defaultPieces);
   const boardRef = useRef(null);
   const [currentPiece, setCurrentPiece] = useState(null);
@@ -30,7 +32,7 @@ const OnlinePieces = () => {
     "k",
     "q",
   ]);
-  const [prevMove, setPrevMove] = useState(null);
+  const [enPassantAvailability, setEnPassantAvailabillity] = useState(null);
   const [promoting, setPromoting] = useState(false);
   const [gamestate, setGamestate] = useState(null);
   const [takenPieces, setTakenPieces] = useState({
@@ -53,21 +55,34 @@ const OnlinePieces = () => {
         newCol,
         currentTurn,
         castlingAvailability,
-        prevMove
+        enPassantAvailability
       )
     ) {
+      // if (pieces[oldRow][oldCol][0] !== playerColour) {
+      //   setCurrentPiece(null);
+      //   return;
+      // }
+
       if ("kr".includes(pieces[oldRow][oldCol][1])) {
         let changedIndices = convertCastlingAvailability(
           pieces[oldRow][oldCol],
           oldCol
         );
+
         setCastlingAvailability((prev) => {
           changedIndices.forEach((i) => {
-            prev[i] = "-";
+            prev[i] = "";
           });
           return prev;
         });
       }
+
+      if (isEnPassantTarget(pieces, oldRow, oldCol, newRow, newCol)) {
+        setEnPassantAvailabillity(`${newCol}${newRow}`);
+      } else {
+        setEnPassantAvailabillity(null);
+      }
+
       const takenPiece = findTakenPiece(
         pieces,
         oldRow,
@@ -101,7 +116,6 @@ const OnlinePieces = () => {
       }
       const nextPieces = constructBoard(pieces, oldRow, oldCol, newRow, newCol);
       setPieces(nextPieces);
-      setPrevMove(`${oldRow}${oldCol}${newRow}${newCol}`);
       if (isPromoting(nextPieces)) {
         setPromoting({ row: newRow, col: newCol });
       } else {
@@ -155,7 +169,7 @@ const OnlinePieces = () => {
 
   const handleDragOver = (e) => e.preventDefault();
 
-  const handlePromotionClick = (row, col, piece) => {
+  const handlePromotionClick = async (row, col, piece) => {
     const nextPieces = constructBoardPromotion(pieces, row, col, piece);
     setPieces(nextPieces);
     setPromoting(false);
@@ -226,4 +240,4 @@ const OnlinePieces = () => {
   );
 };
 
-export default OnlinePieces;
+export default LocalPieces;

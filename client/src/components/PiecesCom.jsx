@@ -17,6 +17,7 @@ import { defaultPieces } from "../utils/DefaultPieces.js";
 import Board from "./Board.jsx";
 import MoveSoundEffect from "../assets/move.mp3";
 import CaptureSoundEffect from "../assets/capture.mp3";
+import socket from "../utils/socket.js";
 
 const PiecesCom = () => {
   const playerColour = "w";

@@ -60,10 +60,10 @@ const ComputerPieces = () => {
         enPassantAvailability
       )
     ) {
-      if (pieces[oldRow][oldCol][0] !== playerColour) {
-        setCurrentPiece(null);
-        return;
-      }
+      // if (pieces[oldRow][oldCol][0] !== playerColour) {
+      //   setCurrentPiece(null);
+      //   return;
+      // }
 
       if ("kr".includes(pieces[oldRow][oldCol][1])) {
         let changedIndices = convertCastlingAvailability(
@@ -143,6 +143,7 @@ const ComputerPieces = () => {
         turnCount
       );
       const engineMove = await getEngineMove(fenState);
+      console.log(`Engine Move: ${engineMove}`);
       const oldCol = engineMove.charCodeAt(0) - 97;
       const oldRow = engineMove.charCodeAt(1) - 49;
       const newCol = engineMove.charCodeAt(2) - 97;

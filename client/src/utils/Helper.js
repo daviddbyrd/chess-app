@@ -216,18 +216,12 @@ export const isValidMove = (...args) => {
         enPassantAvailability
       )
     ) {
-      console.log("made it here 1");
-      console.log(currentPiece);
-      console.log(oldRow);
-      console.log(oldCol);
-      console.log(pieces);
       return false;
     }
   } else {
     const PieceClass = pieceConvert[currentPiece[1]];
 
     if (!PieceClass.isValidMove(pieces, oldRow, oldCol, newRow, newCol, turn)) {
-      console.log("made it here 2");
       return false;
     }
   }
@@ -504,8 +498,6 @@ export const fenConvertor = (
   fenString.push(` ${castlingAvailability.join("")}`);
 
   const enPassantTarget = getEnPassantTarget(enPassantAvailability);
-  console.log(enPassantAvailability);
-  console.log(enPassantTarget);
   fenString.push(` ${enPassantTarget}`);
   fenString.push(` ${halfMoveClock}`);
   fenString.push(` ${turnCount}`);

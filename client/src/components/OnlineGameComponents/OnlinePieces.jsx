@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import socket from "../../utils/socket.js";
 import Piece from "../Piece.jsx";
 import PieceIcon from "../PieceIcon.jsx";
 import PromotionMenu from "../PromotionMenu.jsx";
@@ -20,7 +21,7 @@ import Board from "../Board.jsx";
 import MoveSoundEffect from "../../assets/move.mp3";
 import CaptureSoundEffect from "../../assets/capture.mp3";
 
-const LocalPieces = () => {
+const OnlinePieces = () => {
   const [pieces, setPieces] = useState(defaultPieces);
   const boardRef = useRef(null);
   const [currentPiece, setCurrentPiece] = useState(null);
@@ -40,6 +41,10 @@ const LocalPieces = () => {
   });
   const captureSound = new Audio(CaptureSoundEffect);
   const moveSound = new Audio(MoveSoundEffect);
+  const [keyQuery, setKeyQuery] = useState("");
+  const [gameKey, setGameKey] = useState(null);
+  const [playerColour, setPlayerColour] = useState(null);
+  const playerColourRef = useRef(playerColour);
 
   const movePiece = (oldRow, oldCol, newRow, newCol) => {
     if (
@@ -55,11 +60,13 @@ const LocalPieces = () => {
         enPassantAvailability
       )
     ) {
-      // if (pieces[oldRow][oldCol][0] !== playerColour) {
-      //   setCurrentPiece(null);
-      //   return;
-      // }
-
+      if (pieces[oldRow][oldCol][0] !== playerColour) {
+        console.log("HELLO");
+        console.log(pieces[oldRow][oldCol][0]);
+        console.log(playerColour);
+        setCurrentPiece(null);
+        return;
+      }
       if ("kr".includes(pieces[oldRow][oldCol][1])) {
         let changedIndices = convertCastlingAvailability(
           pieces[oldRow][oldCol],
@@ -91,8 +98,6 @@ const LocalPieces = () => {
       if (takenPiece) {
         captureSound.play();
 
-        setHalfMoveClock(0);
-
         let colour = takenPiece[0];
         setTakenPieces((prev) => {
           const newTakenPieces = [...prev[colour], takenPiece];
@@ -104,12 +109,6 @@ const LocalPieces = () => {
         });
       } else {
         moveSound.play();
-
-        if (pieces[oldRow][oldCol][1] !== "p") {
-          setHalfMoveClock((prev) => prev + 1);
-        } else {
-          setHalfMoveClock(0);
-        }
       }
       const nextPieces = constructBoard(pieces, oldRow, oldCol, newRow, newCol);
       setPieces(nextPieces);
@@ -117,12 +116,14 @@ const LocalPieces = () => {
         setPromoting({ row: newRow, col: newCol });
       } else {
         if (currentTurn === "b") {
-          setTurnCount((prevTurn) => prevTurn + 1);
           setCurrentTurn("w");
+          console.log(1);
         } else {
           setCurrentTurn("b");
+          console.log(2);
         }
       }
+      sendMove(nextPieces);
     }
     setCurrentPiece(null);
   };
@@ -172,8 +173,10 @@ const LocalPieces = () => {
     setPromoting(false);
     if (currentTurn === "b") {
       setCurrentTurn("w");
+      console.log(3);
     } else {
       setCurrentTurn("b");
+      console.log(4);
     }
   };
 
@@ -183,8 +186,90 @@ const LocalPieces = () => {
     setCurrentTurn("w");
   };
 
+  useEffect(() => {
+    console.log(`Updated playerColour: ${playerColour}`);
+  }, [playerColour]);
+
+  useEffect(() => {
+    socket.on("gameCreated", (key) => {
+      setGameKey(key);
+      console.log(key);
+    });
+
+    socket.on("startGame", ({ key, colour }) => {
+      console.log("GameStarted");
+      setGameKey(key);
+      setPlayerColour(colour);
+      console.log(`colour: ${colour}`);
+    });
+
+    socket.on("moveMade", ({ nextPieces, turn }) => {
+      updateState(nextPieces, turn);
+    });
+  }, []);
+
+  const createGame = () => {
+    socket.emit("createGame");
+  };
+
+  const joinGame = () => {
+    socket.emit("joinGame", keyQuery);
+    console.log(keyQuery);
+  };
+
+  useEffect(() => {
+    playerColourRef.current = playerColour;
+  }, [playerColour]);
+
+  const updateState = (nextPieces, turn) => {
+    if (playerColourRef.current !== turn) {
+      console.log(
+        `update state success, turn: ${turn}, playerColourRef: ${playerColourRef.current}`
+      );
+      setPieces(nextPieces);
+      setCurrentTurn(playerColourRef.current);
+    } else {
+      console.log(
+        `update state failed, turn: ${turn}, playerColourRef: ${playerColourRef.current}`
+      );
+      console.log(nextPieces);
+    }
+  };
+
+  const sendMove = (nextPieces) => {
+    console.log(nextPieces);
+    console.log(`playerColour: ${playerColour}, gameKey: ${gameKey}`);
+    socket.emit("changeState", {
+      key: gameKey,
+      nextPieces: nextPieces,
+      turn: playerColour,
+    });
+  };
+
   return (
     <>
+      <div>
+        <button
+          className="w-90 h-7 bg-red-400 m-4 rounded-lg cursor-grab bg-white shadow-md"
+          onClick={() => createGame()}
+        >
+          <h1 className="text-gray text-lg">Create Game</h1>
+        </button>
+        <div>
+          <input
+            value={keyQuery}
+            placeholder="Enter Key"
+            onChange={(e) => setKeyQuery(e.target.value)}
+            className="w-40 h-7 bg-red-400 m-4 rounded-lg bg-white shadow-md text-lg pl-4 caret-black"
+          />
+          <button
+            className="w-40 h-7 bg-red-400 m-4 rounded-lg cursor-grab bg-white shadow-md"
+            onClick={() => joinGame(keyQuery)}
+          >
+            <h1 className="text-gray text-lg">Join Game</h1>
+          </button>
+        </div>
+      </div>
       <div className="relative w-full">
         <div className="grid grid-flow-col h-10 justify-start">
           {takenPieces.w.map((piece, i) => (
@@ -237,4 +322,4 @@ const LocalPieces = () => {
   );
 };
 
-export default LocalPieces;
+export default OnlinePieces;

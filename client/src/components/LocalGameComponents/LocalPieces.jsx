@@ -38,8 +38,6 @@ const LocalPieces = () => {
     b: [],
     w: [],
   });
-  const [turnCount, setTurnCount] = useState(1);
-  const [halfMoveClock, setHalfMoveClock] = useState(0);
   const captureSound = new Audio(CaptureSoundEffect);
   const moveSound = new Audio(MoveSoundEffect);
 

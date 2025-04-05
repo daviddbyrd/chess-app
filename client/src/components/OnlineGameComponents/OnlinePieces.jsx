@@ -23,6 +23,7 @@ import CaptureSoundEffect from "../../assets/capture.mp3";
 
 const OnlinePieces = () => {
   const [pieces, setPieces] = useState(defaultPieces);
+  const piecesRef = useRef(pieces);
   const boardRef = useRef(null);
   const [currentPiece, setCurrentPiece] = useState(null);
   const [currentTurn, setCurrentTurn] = useState("w");
@@ -46,30 +47,30 @@ const OnlinePieces = () => {
   const [playerColour, setPlayerColour] = useState(null);
   const playerColourRef = useRef(playerColour);
 
-  const movePiece = (oldRow, oldCol, newRow, newCol) => {
+  const movePiece = (oldRow, oldCol, newRow, newCol, playerMove) => {
     if (
-      !promoting &&
-      isValidMove(
-        pieces,
-        oldRow,
-        oldCol,
-        newRow,
-        newCol,
-        currentTurn,
-        castlingAvailability,
-        enPassantAvailability
-      )
+      !playerMove ||
+      (!promoting &&
+        isValidMove(
+          piecesRef.current,
+          oldRow,
+          oldCol,
+          newRow,
+          newCol,
+          currentTurn,
+          castlingAvailability,
+          enPassantAvailability
+        ))
     ) {
-      if (pieces[oldRow][oldCol][0] !== playerColour) {
-        console.log("HELLO");
-        console.log(pieces[oldRow][oldCol][0]);
-        console.log(playerColour);
+      console.log(`HERE WE GO AGAIN ${oldRow}, ${oldCol} ${piecesRef.current}`);
+      if (playerMove && pieces[oldRow][oldCol][0] !== playerColour) {
         setCurrentPiece(null);
+        console.log("Failed here");
         return;
       }
-      if ("kr".includes(pieces[oldRow][oldCol][1])) {
+      if ("kr".includes(piecesRef.current[oldRow][oldCol][1])) {
         let changedIndices = convertCastlingAvailability(
-          pieces[oldRow][oldCol],
+          piecesRef.current[oldRow][oldCol],
           oldCol
         );
 
@@ -81,14 +82,16 @@ const OnlinePieces = () => {
         });
       }
 
-      if (isEnPassantTarget(pieces, oldRow, oldCol, newRow, newCol)) {
+      if (
+        isEnPassantTarget(piecesRef.current, oldRow, oldCol, newRow, newCol)
+      ) {
         setEnPassantAvailabillity(`${newCol}${newRow}`);
       } else {
         setEnPassantAvailabillity(null);
       }
 
       const takenPiece = findTakenPiece(
-        pieces,
+        piecesRef.current,
         oldRow,
         oldCol,
         newRow,
@@ -110,8 +113,15 @@ const OnlinePieces = () => {
       } else {
         moveSound.play();
       }
-      const nextPieces = constructBoard(pieces, oldRow, oldCol, newRow, newCol);
+      const nextPieces = constructBoard(
+        piecesRef.current,
+        oldRow,
+        oldCol,
+        newRow,
+        newCol
+      );
       setPieces(nextPieces);
+      console.log(nextPieces);
       if (isPromoting(nextPieces)) {
         setPromoting({ row: newRow, col: newCol });
       } else {
@@ -123,8 +133,12 @@ const OnlinePieces = () => {
           console.log(2);
         }
       }
-      sendMove(nextPieces);
+      if (playerMove) {
+        sendMove(oldRow, oldCol, newRow, newCol);
+        console.log(`HERE WE GO AGAIN ${oldRow}, ${oldCol} inner`);
+      }
     }
+    console.log("main function failed");
     setCurrentPiece(null);
   };
 
@@ -138,7 +152,7 @@ const OnlinePieces = () => {
 
   const handleClick = (row, col, piece) => {
     if (currentPiece && !promoting) {
-      movePiece(currentPiece.row, currentPiece.col, row, col);
+      movePiece(currentPiece.row, currentPiece.col, row, col, true);
     } else {
       if (piece) {
         setCurrentPiece({ row, col, piece });
@@ -161,7 +175,7 @@ const OnlinePieces = () => {
     let row = parseInt(data[2]);
     let col = parseInt(data[3]);
     if (0 <= newRow && newRow < 8 && 0 <= newCol && newCol < 8) {
-      movePiece(row, col, newRow, newCol);
+      movePiece(row, col, newRow, newCol, true);
     }
   };
 
@@ -203,8 +217,9 @@ const OnlinePieces = () => {
       console.log(`colour: ${colour}`);
     });
 
-    socket.on("moveMade", ({ nextPieces, turn }) => {
-      updateState(nextPieces, turn);
+    socket.on("moveMade", ({ oldRow, oldCol, newRow, newCol, turn }) => {
+      console.log(`move made called ${oldRow} ${oldCol}`);
+      updateState(oldRow, oldCol, newRow, newCol, turn);
     });
   }, []);
 
@@ -218,30 +233,36 @@ const OnlinePieces = () => {
   };
 
   useEffect(() => {
+    piecesRef.current = pieces;
+  }, [pieces]);
+
+  useEffect(() => {
     playerColourRef.current = playerColour;
   }, [playerColour]);
 
-  const updateState = (nextPieces, turn) => {
+  const updateState = (oldRow, oldCol, newRow, newCol, turn) => {
     if (playerColourRef.current !== turn) {
       console.log(
         `update state success, turn: ${turn}, playerColourRef: ${playerColourRef.current}`
       );
-      setPieces(nextPieces);
+      movePiece(oldRow, oldCol, newRow, newCol, false);
       setCurrentTurn(playerColourRef.current);
     } else {
       console.log(
         `update state failed, turn: ${turn}, playerColourRef: ${playerColourRef.current}`
       );
-      console.log(nextPieces);
     }
   };
 
-  const sendMove = (nextPieces) => {
-    console.log(nextPieces);
+  const sendMove = (oldRow, oldCol, newRow, newCol) => {
+    console.log(`Send move called ${oldRow} ${oldCol}`);
     console.log(`playerColour: ${playerColour}, gameKey: ${gameKey}`);
     socket.emit("changeState", {
       key: gameKey,
-      nextPieces: nextPieces,
+      oldRow,
+      oldCol,
+      newRow,
+      newCol,
       turn: playerColour,
     });
   };
@@ -255,6 +276,7 @@ const OnlinePieces = () => {
         >
           <h1 className="text-gray text-lg">Create Game</h1>
         </button>
+        {gameKey && gameKey}
         <div>
           <input
             value={keyQuery}

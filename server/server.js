@@ -38,8 +38,9 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("changeState", ({ key, nextPieces, turn }) => {
-    io.to(key).emit("moveMade", { nextPieces: nextPieces, turn: turn });
+  socket.on("changeState", ({ key, oldRow, oldCol, newRow, newCol, turn }) => {
+    console.log(`Change State called ${oldRow} ${oldCol}`);
+    io.to(key).emit("moveMade", { oldRow, oldCol, newRow, newCol, turn });
   });
 });
 

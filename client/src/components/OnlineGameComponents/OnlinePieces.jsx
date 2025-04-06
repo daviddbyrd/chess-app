@@ -217,10 +217,10 @@ const OnlinePieces = () => {
       console.log(`colour: ${colour}`);
     });
 
-    socket.on("moveMade", ({ oldRow, oldCol, newRow, newCol, turn }) => {
-      console.log(`move made called ${oldRow} ${oldCol}`);
-      updateState(oldRow, oldCol, newRow, newCol, turn);
-    });
+    socket.on("changeState", ({ key, oldRow, oldCol, newRow, newCol, turn }) => {
+    console.log(`Change State called ${oldRow} ${oldCol}`);
+    io.to(key).emit("moveMade", { oldRow, oldCol, newRow, newCol, turn });
+  });
   }, []);
 
   const createGame = () => {

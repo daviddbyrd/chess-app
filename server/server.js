@@ -2,6 +2,8 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const { isValid } = require("./chess.js");
+const { chess } = require("chess.js");
 
 const app = express();
 const server = http.createServer(app);
@@ -20,7 +22,7 @@ io.on("connection", (socket) => {
     const key = Math.random().toString(36).substring(2, 6);
     games[key] = {
       players: [socket.id],
-      state: null,
+      board: new Chess(),
     };
     socket.join(key);
     socket.emit("gameCreated", key);
@@ -38,9 +40,19 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("changeState", ({ key, oldRow, oldCol, newRow, newCol, turn }) => {
-    console.log(`Change State called ${oldRow} ${oldCol}`);
-    io.to(key).emit("moveMade", { oldRow, oldCol, newRow, newCol, turn });
+  socket.on("changeState", ({ key, move }) => {
+    let result = board.move(move);
+    if (result) {
+      io.to(key).emit("moveMade", {
+        success: true,
+        board: board.fen(),
+      });
+    } else {
+      io.to(key).emit("moveMade", {
+        success: false,
+        board: board.fen(),
+      });
+    }
   });
 });
 

@@ -1,12 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import socket from "../../utils/socket.js";
 import { Chessboard } from "react-chessboard";
+import MoveSoundEffect from "../../assets/move.mp3";
+import CaptureSoundEffect from "../../assets/capture.mp3";
 
 const OnlinePieces = () => {
   const [game, setGame] = useState(null);
   const [gameKey, setGameKey] = useState();
   const [keyQuery, setKeyQuery] = useState("");
   const [playerColour, setPlayerColour] = useState();
+  const captureSound = new Audio(CaptureSoundEffect);
+  const moveSound = new Audio(MoveSoundEffect);
 
   useEffect(() => {
     socket.on("gameCreated", ({ key, colour, initialGame }) => {
@@ -16,15 +20,19 @@ const OnlinePieces = () => {
     });
 
     socket.on("startGame", ({ key, colour, initialGame }) => {
-      console.log(JSON.stringify(initialGame.fen()));
       setGameKey(key);
       setPlayerColour(colour);
       setGame(initialGame);
     });
 
-    socket.on("moveMade", ({ success, newGame }) => {
+    socket.on("moveMade", ({ success, newGame, captured }) => {
       if (success) {
         setGame(newGame);
+        if (captured) {
+          captureSound.play();
+        } else {
+          moveSound.play();
+        }
       }
     });
   }, []);
@@ -76,14 +84,14 @@ const OnlinePieces = () => {
         </div>
       </div>
       {game && (
-        <div>{JSON.stringify(game.fen())}</div>
-        // <div className="h-130 w-130 relative">
-        //   <Chessboard
-        //     position={game.fen()}
-        //     onPieceDrop={onDrop}
-        //     autoPromoteToQueen={true}
-        //   />
-        // </div>
+        <div className="h-130 w-130 relative">
+          <Chessboard
+            position={game}
+            onPieceDrop={onDrop}
+            autoPromoteToQueen={true}
+            animationDuration={0}
+          />
+        </div>
       )}
     </>
   );

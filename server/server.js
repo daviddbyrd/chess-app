@@ -9,8 +9,6 @@ const io = new Server(server, {
   },
 });
 const { Chess } = require("chess.js");
-let b = new Chess();
-console.log(b.fen());
 
 let games = {};
 
@@ -39,12 +37,12 @@ io.on("connection", (socket) => {
       io.to(games[key].creator).emit("startGame", {
         key,
         colour: "w",
-        initialGame: games[key].board,
+        initialGame: games[key].board.fen(),
       });
       io.to(socket.id).emit("startGame", {
         key,
         colour: "b",
-        initialGame: games[key].board,
+        initialGame: games[key].board.fen(),
       });
     } else {
       socket.emit("error", "Invalid key or full game");
@@ -62,21 +60,20 @@ io.on("connection", (socket) => {
       });
       return;
     }
-    let result = games[key].board.move({
-      from: sourceSquare,
-      to: targetSquare,
-    });
-    if (result) {
-      console.log(`success: ${games[key].board.fen()}`);
-      games[key].board = result;
+    try {
+      let result = games[key].board.move({
+        from: sourceSquare,
+        to: targetSquare,
+      });
       io.to(key).emit("moveMade", {
         success: true,
-        newGame: result,
+        newGame: games[key].board.fen(),
+        captured: result.captured,
       });
-    } else {
+    } catch (error) {
       io.to(key).emit("moveMade", {
         success: false,
-        newGame: result,
+        newGame: games[key].board.fen(),
       });
     }
   });

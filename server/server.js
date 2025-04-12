@@ -10,6 +10,7 @@ const io = new Server(server, {
 });
 const { Chess } = require("chess.js");
 
+// Rooms
 let games = {};
 
 io.on("connection", (socket) => {
